@@ -39,6 +39,9 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(iio-emu LANGUAGES CXX)
 
+include(cmake/compilerWarnings.cmake)
+include(cmake/staticAnalyzers.cmake)
+
 set(CMAKE_CXX_STANDARD 11)
 
 set(IIO_EMU_VERSION_MAJOR 0)
@@ -60,5 +63,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
+
+set_warnings(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
