@@ -23,36 +23,39 @@
 #define IIO_EMU_M2K_ADC_HPP
 
 #include "iiod/devices/abstract_device_in.hpp"
-#include <vector>
-#include <map>
 
-struct  _xmlDoc;
+#include <map>
+#include <vector>
+
+struct _xmlDoc;
 
 namespace iio_emu {
 
-class M2kADC : public AbstractDeviceIn{
+class M2kADC : public AbstractDeviceIn
+{
 public:
-	M2kADC(const char *device_id, struct _xmlDoc *doc);
+	M2kADC(const char* device_id, struct _xmlDoc* doc);
 	~M2kADC() override;
 
 	int32_t open_dev(size_t sample_size, uint32_t mask, bool cyclic) override;
 	int32_t close_dev() override;
 	int32_t set_buffers_count(uint32_t buffers_count) override;
-	int32_t get_mask(uint32_t *mask) override;
-	ssize_t read_dev(char *pbuf, size_t offset, size_t bytes_count) override;
+	int32_t get_mask(uint32_t* mask) override;
+	ssize_t read_dev(char* pbuf, size_t offset, size_t bytes_count) override;
 	int32_t cancel_buffer() override;
 
 	ssize_t transfer_dev_to_mem(size_t bytes_count) override;
-	void connectDevice(unsigned short channel_in, AbstractDeviceOut *deviceOut, unsigned short channel_out) override;
+	void connectDevice(unsigned short channel_in, AbstractDeviceOut* deviceOut,
+			   unsigned short channel_out) override;
 
 private:
-	struct _xmlDoc *m_doc;
+	struct _xmlDoc* m_doc;
 	std::vector<std::pair<AbstractDeviceOut*, unsigned short>> m_connections;
 
 	double m_samplerate;
 	unsigned int m_oversampling_ratio;
 
-	std::vector<char *> m_range;
+	std::vector<char*> m_range;
 	std::vector<double> m_hw_offset;
 	std::map<double, double> m_filter_compensation_table;
 
@@ -63,8 +66,8 @@ private:
 	double getFilterCompensation() const;
 	void loadCalibValues();
 
-	static void resample(AbstractDeviceOut *devOut, size_t size, unsigned int ratio, std::vector<double> &dest);
+	static void resample(AbstractDeviceOut* devOut, size_t size, unsigned int ratio, std::vector<double>& dest);
 };
-}
+} // namespace iio_emu
 
-#endif //IIO_EMU_M2K_ADC_HPP
+#endif // IIO_EMU_M2K_ADC_HPP

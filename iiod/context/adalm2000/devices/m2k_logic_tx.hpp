@@ -37,23 +37,20 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_M2K_DAC_HPP
-#define IIO_EMU_M2K_DAC_HPP
+#ifndef IIO_EMU_M2K_LOGIC_TX_HPP
+#define IIO_EMU_M2K_LOGIC_TX_HPP
 
 #include "iiod/devices/abstract_device_out.hpp"
-
-#include <map>
-#include <vector>
 
 struct _xmlDoc;
 
 namespace iio_emu {
 
-class M2kDAC : public AbstractDeviceOut
+class M2kLogicTX : public AbstractDeviceOut
 {
 public:
-	M2kDAC(const char* device_id, struct _xmlDoc* doc);
-	~M2kDAC() override;
+	M2kLogicTX(const char* device_id, struct _xmlDoc* doc);
+	~M2kLogicTX() override;
 
 	int32_t open_dev(size_t sample_size, uint32_t mask, bool cyclic) override;
 	int32_t close_dev() override;
@@ -68,23 +65,16 @@ public:
 
 private:
 	struct _xmlDoc* m_doc;
-	bool m_cyclic;
-	bool m_enable;
 
+	std::vector<uint16_t> m_samples;
 	unsigned int m_current_index;
 
 	double m_samplerate;
-	unsigned int m_oversampling_ratio;
-	double m_calib_vlsb;
-	std::map<double, double> m_filter_compensation_table;
-	std::vector<double> m_samples;
+
 	bool m_reset_buffer;
 
-	double convertRawToVolts(int16_t raw) const;
-	double getFilterCompensation() const;
-	void loadCalibValues();
-	std::vector<double> resample();
+	void loadValues();
+	std::vector<uint16_t> resample();
 };
 } // namespace iio_emu
-
-#endif // IIO_EMU_M2K_DAC_HPP
+#endif // IIO_EMU_M2K_LOGIC_TX_HPP

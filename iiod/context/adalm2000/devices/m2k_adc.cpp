@@ -38,8 +38,10 @@
  */
 
 #include "m2k_adc.hpp"
-#include "utils/utility.hpp"
+
 #include "utils/attr_ops_xml.hpp"
+#include "utils/utility.hpp"
+
 #include <thread>
 
 #define M2K_ADC_CHANNELS 2
@@ -49,7 +51,7 @@
 
 using namespace iio_emu;
 
-M2kADC::M2kADC(const char *device_id, struct _xmlDoc *doc)
+M2kADC::M2kADC(const char* device_id, struct _xmlDoc* doc)
 {
 	m_device_id = device_id;
 	m_doc = doc;
@@ -83,10 +85,7 @@ int32_t M2kADC::open_dev(size_t sample_size, uint32_t mask, bool cyclic)
 	return 0;
 }
 
-int32_t M2kADC::close_dev()
-{
-	return 0;
-}
+int32_t M2kADC::close_dev() { return 0; }
 
 int32_t M2kADC::set_buffers_count(uint32_t buffers_count)
 {
@@ -94,31 +93,32 @@ int32_t M2kADC::set_buffers_count(uint32_t buffers_count)
 	return 0;
 }
 
-int32_t M2kADC::get_mask(uint32_t *mask)
+int32_t M2kADC::get_mask(uint32_t* mask)
 {
 	*mask = 3;
 	return 0;
 }
 
-ssize_t M2kADC::read_dev(char *pbuf, size_t offset, size_t bytes_count)
+ssize_t M2kADC::read_dev(char* pbuf, size_t offset, size_t bytes_count)
 {
 	UNUSED(offset);
 	loadCalibValues();
 
 	std::vector<int16_t> samples;
-	samples.reserve(bytes_count/M2K_ADC_SAMPLE_SIZE);
+	samples.reserve(bytes_count / M2K_ADC_SAMPLE_SIZE);
 	auto ratio = static_cast<unsigned int>(1E8 / (m_samplerate / m_oversampling_ratio));
 	size_t size = (bytes_count / (M2K_ADC_CHANNELS * M2K_ADC_SAMPLE_SIZE)) * ratio;
 
 	std::vector<double> dac_a_samples;
 	std::vector<double> dac_b_samples;
 
-	std::thread read_ch1(M2kADC::resample, m_connections.at(M2K_ADC_CHANNEL_1).first, size, ratio, std::ref(dac_a_samples));
-	std::thread read_ch2(M2kADC::resample, m_connections.at(M2K_ADC_CHANNEL_2).first, size, ratio, std::ref(dac_b_samples));
+	std::thread read_ch1(M2kADC::resample, m_connections.at(M2K_ADC_CHANNEL_1).first, size, ratio,
+			     std::ref(dac_a_samples));
+	std::thread read_ch2(M2kADC::resample, m_connections.at(M2K_ADC_CHANNEL_2).first, size, ratio,
+			     std::ref(dac_b_samples));
 
 	read_ch1.join();
 	read_ch2.join();
-
 
 	for (size_t i = 0, j = 0; i < bytes_count / (M2K_ADC_CHANNELS * M2K_ADC_SAMPLE_SIZE); i++, j += 2) {
 		samples.emplace_back(convertVoltToRaw(dac_a_samples.at(i), M2K_ADC_CHANNEL_1));
@@ -129,7 +129,7 @@ ssize_t M2kADC::read_dev(char *pbuf, size_t offset, size_t bytes_count)
 	return static_cast<ssize_t>(bytes_count);
 }
 
-void M2kADC::connectDevice(unsigned short channel_in, AbstractDeviceOut *deviceOut, unsigned short channel_out)
+void M2kADC::connectDevice(unsigned short channel_in, AbstractDeviceOut* deviceOut, unsigned short channel_out)
 {
 	m_connections.at(channel_in) = std::pair<AbstractDeviceOut*, unsigned short>(deviceOut, channel_out);
 }
@@ -142,7 +142,7 @@ int16_t M2kADC::convertVoltToRaw(double voltage, unsigned short channel) const
 	const double offset = -m_hw_offset.at(channel);
 
 	return static_cast<int16_t>((voltage - offset) / (correctionGain * filterCompensation) *
-				      (2048 * 1.3 * hw_gain) / 0.78);
+				    (2048 * 1.3 * hw_gain) / 0.78);
 }
 
 double M2kADC::convertRawToVoltsVerticalOffset(int16_t raw, unsigned short channel) const
@@ -168,7 +168,7 @@ double M2kADC::getCalibGain(unsigned short channel) const
 double M2kADC::getFilterCompensation() const
 {
 	double compensation = 0.0;
-	if(m_filter_compensation_table.find(m_samplerate) != m_filter_compensation_table.end()) {
+	if (m_filter_compensation_table.find(m_samplerate) != m_filter_compensation_table.end()) {
 		compensation = m_filter_compensation_table.at(m_samplerate);
 	}
 
@@ -179,8 +179,10 @@ void M2kADC::loadCalibValues()
 {
 	char tmp_attr[IIOD_BUFFER_SIZE];
 
-	read_channel_attr(m_doc, "iio:device11", "voltage0", false, "gain", m_range.at(M2K_ADC_CHANNEL_1), IIOD_BUFFER_SIZE);
-	read_channel_attr(m_doc, "iio:device11", "voltage1", false, "gain", m_range.at(M2K_ADC_CHANNEL_2), IIOD_BUFFER_SIZE);
+	read_channel_attr(m_doc, "iio:device11", "voltage0", false, "gain", m_range.at(M2K_ADC_CHANNEL_1),
+			  IIOD_BUFFER_SIZE);
+	read_channel_attr(m_doc, "iio:device11", "voltage1", false, "gain", m_range.at(M2K_ADC_CHANNEL_2),
+			  IIOD_BUFFER_SIZE);
 
 	read_channel_attr(m_doc, "iio:device2", "voltage2", true, "raw", tmp_attr, IIOD_BUFFER_SIZE);
 	m_hw_offset.at(M2K_ADC_CHANNEL_1) = safe_stod(tmp_attr);
@@ -203,11 +205,11 @@ void M2kADC::loadCalibValues()
 	m_oversampling_ratio = static_cast<unsigned int>(std::stoi(tmp_attr));
 }
 
-void M2kADC::resample(AbstractDeviceOut *devOut, size_t size, unsigned int ratio, std::vector<double> &dest)
+void M2kADC::resample(AbstractDeviceOut* devOut, size_t size, unsigned int ratio, std::vector<double>& dest)
 {
 	std::vector<double> tmp_samples(size);
 
-	devOut->transfer_samples_to_RX_device(reinterpret_cast<char *>(tmp_samples.data()), size);
+	devOut->transfer_samples_to_RX_device(reinterpret_cast<char*>(tmp_samples.data()), size);
 
 	if (ratio < 2) {
 		dest = tmp_samples;
@@ -217,10 +219,7 @@ void M2kADC::resample(AbstractDeviceOut *devOut, size_t size, unsigned int ratio
 	analogical_decimation(tmp_samples, dest, ratio);
 }
 
-int32_t M2kADC::cancel_buffer()
-{
-	return 0;
-}
+int32_t M2kADC::cancel_buffer() { return 0; }
 
 ssize_t M2kADC::transfer_dev_to_mem(size_t bytes_count)
 {

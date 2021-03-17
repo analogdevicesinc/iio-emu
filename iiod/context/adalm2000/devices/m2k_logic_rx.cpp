@@ -37,54 +37,87 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_M2K_DAC_HPP
-#define IIO_EMU_M2K_DAC_HPP
+#include "m2k_logic_rx.hpp"
 
-#include "iiod/devices/abstract_device_out.hpp"
+#include "utils/attr_ops_xml.hpp"
+#include "utils/utility.hpp"
 
-#include <map>
-#include <vector>
+using namespace iio_emu;
 
-struct _xmlDoc;
-
-namespace iio_emu {
-
-class M2kDAC : public AbstractDeviceOut
+M2kLogicRX::M2kLogicRX(const char* device_id, struct _xmlDoc* doc)
 {
-public:
-	M2kDAC(const char* device_id, struct _xmlDoc* doc);
-	~M2kDAC() override;
+	m_device_id = device_id;
+	m_doc = doc;
 
-	int32_t open_dev(size_t sample_size, uint32_t mask, bool cyclic) override;
-	int32_t close_dev() override;
-	int32_t set_buffers_count(uint32_t buffers_count) override;
-	int32_t get_mask(uint32_t* mask) override;
-	ssize_t write_dev(const char* buf, size_t offset, size_t bytes_count) override;
-	ssize_t transfer_mem_to_dev(size_t bytes_count) override;
+	m_connections = std::vector<std::pair<AbstractDeviceOut*, unsigned short>>(1);
+}
 
-	int32_t cancel_buffer() override;
+M2kLogicRX::~M2kLogicRX() {}
 
-	void transfer_samples_to_RX_device(char* buf, size_t samples_count) override;
+int32_t M2kLogicRX::open_dev(size_t sample_size, uint32_t mask, bool cyclic)
+{
+	UNUSED(sample_size);
+	UNUSED(mask);
+	UNUSED(cyclic);
+	return 0;
+}
 
-private:
-	struct _xmlDoc* m_doc;
-	bool m_cyclic;
-	bool m_enable;
+int32_t M2kLogicRX::close_dev() { return 0; }
 
-	unsigned int m_current_index;
+int32_t M2kLogicRX::set_buffers_count(uint32_t buffers_count)
+{
+	UNUSED(buffers_count);
+	return 0;
+}
 
-	double m_samplerate;
-	unsigned int m_oversampling_ratio;
-	double m_calib_vlsb;
-	std::map<double, double> m_filter_compensation_table;
-	std::vector<double> m_samples;
-	bool m_reset_buffer;
+int32_t M2kLogicRX::get_mask(uint32_t* mask)
+{
+	UNUSED(mask);
+	return 0;
+}
 
-	double convertRawToVolts(int16_t raw) const;
-	double getFilterCompensation() const;
-	void loadCalibValues();
-	std::vector<double> resample();
-};
-} // namespace iio_emu
+ssize_t M2kLogicRX::read_dev(char* pbuf, size_t offset, size_t bytes_count)
+{
+	UNUSED(offset);
+	std::vector<uint16_t> samples = resample(0, bytes_count);
 
-#endif // IIO_EMU_M2K_DAC_HPP
+	memcpy(pbuf, samples.data(), bytes_count);
+	return static_cast<ssize_t>(bytes_count);
+}
+
+void M2kLogicRX::connectDevice(unsigned short channel_in, AbstractDeviceOut* deviceOut, unsigned short channel_out)
+{
+	m_connections.at(channel_in) = std::pair<AbstractDeviceOut*, unsigned short>(deviceOut, channel_out);
+}
+
+std::vector<uint16_t> M2kLogicRX::resample(unsigned short channel, size_t len)
+{
+	UNUSED(channel);
+	loadValues();
+	std::vector<uint16_t> samples;
+	auto ratio = static_cast<unsigned int>(1E8 / m_samplerate);
+
+	std::vector<uint16_t> tmp_samples((len / 2) * ratio);
+	m_connections.at(0).first->transfer_samples_to_RX_device(reinterpret_cast<char*>(tmp_samples.data()),
+								 (len / 2) * ratio);
+
+	digital_decimation(tmp_samples, samples, ratio);
+
+	return samples;
+}
+
+void M2kLogicRX::loadValues()
+{
+	char tmp_attr[IIOD_BUFFER_SIZE];
+
+	read_device_attr(m_doc, m_device_id, "sampling_frequency", tmp_attr, IIOD_BUFFER_SIZE, IIO_ATTR_TYPE_DEVICE);
+	m_samplerate = safe_stod(tmp_attr);
+}
+
+int32_t M2kLogicRX::cancel_buffer() { return 0; }
+
+ssize_t M2kLogicRX::transfer_dev_to_mem(size_t bytes_count)
+{
+	UNUSED(bytes_count);
+	return 0;
+}

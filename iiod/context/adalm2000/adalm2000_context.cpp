@@ -41,6 +41,8 @@
 
 #include "iiod/context/adalm2000/devices/m2k_adc.hpp"
 #include "iiod/context/adalm2000/devices/m2k_dac.hpp"
+#include "iiod/context/adalm2000/devices/m2k_logic_rx.hpp"
+#include "iiod/context/adalm2000/devices/m2k_logic_tx.hpp"
 #include "utils/attr_ops_xml.hpp"
 #include "utils/utility.hpp"
 
@@ -68,14 +70,20 @@ Adalm2000Context::Adalm2000Context()
 	auto adc = new M2kADC("iio:device0", m_doc);
 	auto dac_a = new M2kDAC("iio:device6", m_doc);
 	auto dac_b = new M2kDAC("iio:device7", m_doc);
+	auto logic_rx = new M2kLogicRX("iio:device10", m_doc);
+	auto logic_tx = new M2kLogicTX("iio:device9", m_doc);
 
 	addDevice(adc);
 	addDevice(dac_a);
 	addDevice(dac_b);
+	addDevice(logic_rx);
+	addDevice(logic_tx);
 
 	// connections
 	adc->connectDevice(0, dac_a, 0);
 	adc->connectDevice(1, dac_b, 0);
+	logic_rx->connectDevice(0, logic_tx, 0);
+
 	assignBasicOps();
 
 	loadPSCalibCoef();

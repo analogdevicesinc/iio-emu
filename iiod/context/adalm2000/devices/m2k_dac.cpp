@@ -38,13 +38,15 @@
  */
 
 #include "m2k_dac.hpp"
-#include "utils/utility.hpp"
+
 #include "utils/attr_ops_xml.hpp"
+#include "utils/utility.hpp"
+
 #include <vector>
 
 using namespace iio_emu;
 
-M2kDAC::M2kDAC(const char *device_id, struct _xmlDoc *doc)
+M2kDAC::M2kDAC(const char* device_id, struct _xmlDoc* doc)
 {
 	m_device_id = device_id;
 	m_doc = doc;
@@ -52,7 +54,7 @@ M2kDAC::M2kDAC(const char *device_id, struct _xmlDoc *doc)
 
 	m_current_index = 0;
 
-	m_calib_vlsb = 10.0 / (( 1 << 12) - 1);
+	m_calib_vlsb = 10.0 / ((1 << 12) - 1);
 
 	m_filter_compensation_table[75E6] = 1.00;
 	m_filter_compensation_table[75E5] = 1.525879;
@@ -62,10 +64,7 @@ M2kDAC::M2kDAC(const char *device_id, struct _xmlDoc *doc)
 	m_filter_compensation_table[75E1] = 1.033976;
 }
 
-M2kDAC::~M2kDAC()
-{
-
-}
+M2kDAC::~M2kDAC() {}
 
 int32_t M2kDAC::open_dev(size_t sample_size, uint32_t mask, bool cyclic)
 {
@@ -91,7 +90,7 @@ int32_t M2kDAC::set_buffers_count(uint32_t buffers_count)
 	return 0;
 }
 
-int32_t M2kDAC::get_mask(uint32_t *mask)
+int32_t M2kDAC::get_mask(uint32_t* mask)
 {
 	*mask = 0;
 	if (m_enable) {
@@ -100,7 +99,7 @@ int32_t M2kDAC::get_mask(uint32_t *mask)
 	return 0;
 }
 
-ssize_t M2kDAC::write_dev(const char *buf, size_t offset, size_t bytes_count)
+ssize_t M2kDAC::write_dev(const char* buf, size_t offset, size_t bytes_count)
 {
 	UNUSED(offset);
 	if (!m_enable) {
@@ -113,8 +112,8 @@ ssize_t M2kDAC::write_dev(const char *buf, size_t offset, size_t bytes_count)
 		m_reset_buffer = false;
 	}
 
-	auto *samples = reinterpret_cast<const int16_t*>(buf);
-	for (size_t i = 0; i < bytes_count/2; i++) {
+	auto* samples = reinterpret_cast<const int16_t*>(buf);
+	for (size_t i = 0; i < bytes_count / 2; i++) {
 		m_samples.push_back(convertRawToVolts(samples[i]));
 	}
 
@@ -127,10 +126,7 @@ double M2kDAC::convertRawToVolts(int16_t raw) const
 	return -(((raw >> 4) + 0.5) * filterCompensation * m_calib_vlsb);
 }
 
-double M2kDAC::getFilterCompensation() const
-{
-	return m_filter_compensation_table.at(m_samplerate);
-}
+double M2kDAC::getFilterCompensation() const { return m_filter_compensation_table.at(m_samplerate); }
 
 void M2kDAC::loadCalibValues()
 {
@@ -166,7 +162,7 @@ ssize_t M2kDAC::transfer_mem_to_dev(size_t bytes_count)
 	return 0;
 }
 
-void M2kDAC::transfer_samples_to_RX_device(char *buf, size_t samples_count)
+void M2kDAC::transfer_samples_to_RX_device(char* buf, size_t samples_count)
 {
 	if (m_samples.empty()) {
 		m_samples = std::vector<double>(samples_count);
@@ -177,10 +173,12 @@ void M2kDAC::transfer_samples_to_RX_device(char *buf, size_t samples_count)
 	while (samples_count > 0) {
 		remaining_samples = m_samples.size() - m_current_index;
 		remaining_samples = std::min(remaining_samples, samples_count);
-		memcpy(buf + (buffer_index * sizeof(double)), m_samples.data() + m_current_index, remaining_samples * sizeof(double));
+		memcpy(buf + (buffer_index * sizeof(double)), m_samples.data() + m_current_index,
+		       remaining_samples * sizeof(double));
 		buffer_index += remaining_samples;
 		samples_count -= remaining_samples;
-		m_current_index = (m_current_index + static_cast<unsigned int>(remaining_samples)) % static_cast<unsigned int>(m_samples.size());
+		m_current_index = (m_current_index + static_cast<unsigned int>(remaining_samples)) %
+			static_cast<unsigned int>(m_samples.size());
 	}
 }
 
