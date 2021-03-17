@@ -69,6 +69,10 @@ target_include_directories(${PROJECT_NAME}
         ${LIBXML2_INCLUDE_DIR}
         )
 
+if (WIN32 OR CYGWIN OR MINGW)
+    target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         ${LIBXML2_LIBRARIES}
