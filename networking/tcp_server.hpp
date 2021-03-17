@@ -37,25 +37,31 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "networking/tcp_server.hpp"
+#ifndef IIO_EMU_TCP_SERVER_H
+#define IIO_EMU_TCP_SERVER_H
 
-#include <iostream>
 #include <vector>
 
-int main(int argc, char* argv[])
-{
-	if (argc < 2) {
-		std::cerr << "No server type provided" << std::endl;
-		exit(1);
-	}
-	std::cout << "Virtual device: " << argv[1] << std::endl;
+struct tinyiiod;
 
-	std::vector<const char*> args;
-	for (int i = 2; i < argc; i++) {
-		args.push_back(argv[i]);
-	}
+namespace iio_emu {
 
-	iio_emu::TcpServer server(argv[1], args);
-	auto ret = server.start();
-	exit(ret);
+class AbstractOps;
+
+class TcpServer {
+public:
+	TcpServer(const char *type, std::vector<const char *> &args);
+	~TcpServer();
+
+	bool start();
+
+private:
+	static void stop(int signum);
+
+private:
+	struct tinyiiod *m_iiod;
+	AbstractOps *m_ops;
+};
 }
+
+#endif //IIO_EMU_TCP_SERVER_H
