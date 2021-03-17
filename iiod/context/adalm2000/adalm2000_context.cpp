@@ -37,28 +37,33 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "factory_ops.hpp"
+#include "adalm2000_context.hpp"
 
-#include "abstract_ops.hpp"
-#include "iiod/context/adalm2000/adalm2000_context.hpp"
-#include "iiod/context/generic_xml/generic_xml_context.hpp"
+#include <adalm2000_xml.h>
+#include <libxml/tree.h>
 
 using namespace iio_emu;
 
-AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& args)
+Adalm2000Context::Adalm2000Context()
+	: GenericXmlContext(reinterpret_cast<const char*>(adalm2000_xml), sizeof(adalm2000_xml))
 {
-	AbstractOps* iiodOpsAbstract;
+	assignBasicOps();
+}
 
-	if (!strncmp(type, "generic_xml", sizeof("generic_xml") - 1)) {
-		if (args.empty()) {
-			return nullptr;
-		}
-		iiodOpsAbstract = new GenericXmlContext(args.at(0));
-	} else if (!strncmp(type, "adalm2000", sizeof("adalm2000") - 1)) {
-		iiodOpsAbstract = new Adalm2000Context();
-	} else {
-		return nullptr;
+Adalm2000Context::~Adalm2000Context()
+{
+	delete m_iiodOps;
+	m_iiodOps = nullptr;
+
+	xmlFreeDoc(m_doc);
+	xmlCleanupParser();
+	m_doc = nullptr;
+
+	delete m_ctx_xml;
+	m_ctx_xml = nullptr;
+
+	for (auto dev : m_devices) {
+		delete dev;
+		dev = nullptr;
 	}
-
-	return iiodOpsAbstract;
 }

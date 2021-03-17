@@ -37,28 +37,18 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "factory_ops.hpp"
+#ifndef IIO_EMU_ADALM2000_CONTEXT_HPP
+#define IIO_EMU_ADALM2000_CONTEXT_HPP
 
-#include "abstract_ops.hpp"
-#include "iiod/context/adalm2000/adalm2000_context.hpp"
 #include "iiod/context/generic_xml/generic_xml_context.hpp"
 
-using namespace iio_emu;
+namespace iio_emu {
 
-AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& args)
+class Adalm2000Context : public GenericXmlContext
 {
-	AbstractOps* iiodOpsAbstract;
-
-	if (!strncmp(type, "generic_xml", sizeof("generic_xml") - 1)) {
-		if (args.empty()) {
-			return nullptr;
-		}
-		iiodOpsAbstract = new GenericXmlContext(args.at(0));
-	} else if (!strncmp(type, "adalm2000", sizeof("adalm2000") - 1)) {
-		iiodOpsAbstract = new Adalm2000Context();
-	} else {
-		return nullptr;
-	}
-
-	return iiodOpsAbstract;
-}
+public:
+	Adalm2000Context();
+	~Adalm2000Context() override;
+};
+} // namespace iio_emu
+#endif // IIO_EMU_ADALM2000_CONTEXT_HPP
