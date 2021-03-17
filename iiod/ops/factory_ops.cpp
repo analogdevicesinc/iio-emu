@@ -41,6 +41,7 @@
 
 #include "abstract_ops.hpp"
 #include "iiod/context/adalm2000/adalm2000_context.hpp"
+#include "iiod/context/generic_xml/generic_xml_context.hpp"
 
 using namespace iio_emu;
 
@@ -48,7 +49,12 @@ AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& ar
 {
 	AbstractOps* iiodOpsAbstract;
 
-	if (type == nullptr) {
+	if (!strncmp(type, "generic_xml", sizeof("generic_xml") - 1)) {
+		if (args.empty()) {
+			return nullptr;
+		}
+		iiodOpsAbstract = new GenericXmlContext(args.at(0));
+	} else {
 		return nullptr;
 	}
 
