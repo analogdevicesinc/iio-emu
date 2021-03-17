@@ -91,4 +91,14 @@ target_link_libraries(${PROJECT_NAME}
 
 set_warnings(${PROJECT_NAME})
 
+if (NOT WIN32)
+    find_library(PTHREAD_LIBRARIES pthread)
+    if (PTHREAD_LIBRARIES)
+        target_link_libraries(${PROJECT_NAME}
+                PRIVATE
+                ${PTHREAD_LIBRARIES}
+                )
+    endif()
+endif()
+
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

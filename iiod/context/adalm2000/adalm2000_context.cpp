@@ -39,6 +39,8 @@
 
 #include "adalm2000_context.hpp"
 
+#include "iiod/context/adalm2000/devices/m2k_adc.hpp"
+#include "iiod/context/adalm2000/devices/m2k_dac.hpp"
 #include "utils/attr_ops_xml.hpp"
 #include "utils/utility.hpp"
 
@@ -62,6 +64,18 @@ enum CALIBRATION_COEFFICIENT
 Adalm2000Context::Adalm2000Context()
 	: GenericXmlContext(reinterpret_cast<const char*>(adalm2000_xml), sizeof(adalm2000_xml))
 {
+	// devices
+	auto adc = new M2kADC("iio:device0", m_doc);
+	auto dac_a = new M2kDAC("iio:device6", m_doc);
+	auto dac_b = new M2kDAC("iio:device7", m_doc);
+
+	addDevice(adc);
+	addDevice(dac_a);
+	addDevice(dac_b);
+
+	// connections
+	adc->connectDevice(0, dac_a, 0);
+	adc->connectDevice(1, dac_b, 0);
 	assignBasicOps();
 
 	loadPSCalibCoef();
