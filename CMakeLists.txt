@@ -53,9 +53,11 @@ if (NOT WIN32 AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "default install path" FORCE)
 endif()
 
+find_package(tinyiiod REQUIRED)
 find_package(LibXml2 REQUIRED)
 
 FILE(GLOB_RECURSE SRC_LIST
+        iiod/*.cpp
         networking/*.cpp
         utils/*.cpp)
 
@@ -75,6 +77,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
+        tinyiiod::tinyiiod
         ${LIBXML2_LIBRARIES}
         )
 
