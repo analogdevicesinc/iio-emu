@@ -37,32 +37,15 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_TCP_SERVER_H
-#define IIO_EMU_TCP_SERVER_H
+#include "utility.hpp"
 
-#include <vector>
+#include <sstream>
 
-struct tinyiiod;
-
-namespace iio_emu {
-
-class AbstractOps;
-
-class TcpServer
+double iio_emu::safe_stod(const std::string& value)
 {
-public:
-	TcpServer(const char* type, std::vector<const char*>& args);
-	~TcpServer();
-
-	bool start();
-
-private:
-	static void stop(int signum);
-
-private:
-	struct tinyiiod* m_iiod;
-	AbstractOps* m_ops;
-};
-} // namespace iio_emu
-
-#endif // IIO_EMU_TCP_SERVER_H
+	double converted_value = 0.0;
+	std::istringstream in_s(value);
+	in_s.imbue(std::locale("C"));
+	in_s >> converted_value;
+	return converted_value;
+}

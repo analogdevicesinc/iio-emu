@@ -37,32 +37,16 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_TCP_SERVER_H
-#define IIO_EMU_TCP_SERVER_H
+#include "network_ops.hpp"
 
-#include <vector>
+#include "networking/abstract_socket.hpp"
 
-struct tinyiiod;
+#include <cstring>
 
-namespace iio_emu {
-
-class AbstractOps;
-
-class TcpServer
+ssize_t iio_emu::socket_read(AbstractSocket* socket, void* buf, size_t len)
 {
-public:
-	TcpServer(const char* type, std::vector<const char*>& args);
-	~TcpServer();
-
-	bool start();
-
-private:
-	static void stop(int signum);
-
-private:
-	struct tinyiiod* m_iiod;
-	AbstractOps* m_ops;
-};
-} // namespace iio_emu
-
-#endif // IIO_EMU_TCP_SERVER_H
+	char dataReceived[IIOD_BUFFER_SIZE];
+	auto size = socket->getData(len, dataReceived);
+	memcpy(buf, dataReceived, size);
+	return static_cast<ssize_t>(size);
+}

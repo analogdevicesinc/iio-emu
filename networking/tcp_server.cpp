@@ -38,8 +38,10 @@
  */
 
 #include "tcp_server.hpp"
-#include <iiod/ops/abstract_ops.hpp>
+
 #include "iiod/ops/factory_ops.hpp"
+
+#include <iiod/ops/abstract_ops.hpp>
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
 #include "network_unix.hpp"
 #include "socket_unix.hpp"
@@ -48,10 +50,12 @@
 #include "socket_win.hpp"
 #endif
 #include "utils/utility.hpp"
-#include <iostream>
+
 #include <csignal>
+#include <iostream>
 #include <vector>
-extern "C" {
+extern "C"
+{
 #include <tinyiiod/tinyiiod.h>
 }
 
@@ -62,7 +66,7 @@ bool running = true;
 
 using namespace iio_emu;
 
-TcpServer::TcpServer(const char *type, std::vector<const char *> &args)
+TcpServer::TcpServer(const char* type, std::vector<const char*>& args)
 {
 	FactoryOps factory;
 	m_ops = factory.buildOps(type, args);
@@ -97,7 +101,7 @@ bool TcpServer::start()
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
-	NetworkInterface *networkInterface;
+	NetworkInterface* networkInterface;
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
 	networkInterface = new NetworkUnix();
 #else
@@ -107,7 +111,7 @@ bool TcpServer::start()
 		return false;
 	}
 
-	//create listen socket
+	// create listen socket
 	ret = networkInterface->open();
 	if (ret < 0) {
 		std::cerr << "Socket cannot be created: " << strerror(errno) << std::endl;
