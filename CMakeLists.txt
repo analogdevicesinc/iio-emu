@@ -56,6 +56,7 @@ endif()
 find_package(LibXml2 REQUIRED)
 
 FILE(GLOB_RECURSE SRC_LIST
+        networking/*.cpp
         utils/*.cpp)
 
 add_executable(${PROJECT_NAME}
