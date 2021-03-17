@@ -53,7 +53,10 @@ if (NOT WIN32 AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "default install path" FORCE)
 endif()
 
-FILE(GLOB_RECURSE SRC_LIST)
+find_package(LibXml2 REQUIRED)
+
+FILE(GLOB_RECURSE SRC_LIST
+        utils/*.cpp)
 
 add_executable(${PROJECT_NAME}
         main.cpp
@@ -62,6 +65,12 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
+        )
+
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        ${LIBXML2_LIBRARIES}
         )
 
 set_warnings(${PROJECT_NAME})
