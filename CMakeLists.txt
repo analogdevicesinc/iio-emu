@@ -39,6 +39,7 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(iio-emu LANGUAGES CXX)
 
+include(cmake/compileResources.cmake)
 include(cmake/compilerWarnings.cmake)
 include(cmake/staticAnalyzers.cmake)
 
@@ -61,14 +62,21 @@ FILE(GLOB_RECURSE SRC_LIST
         networking/*.cpp
         utils/*.cpp)
 
+FILE(GLOB_RECURSE RESOURCES_LIST
+        iiod/*.xml)
+
+get_resources(${CMAKE_CURRENT_SOURCE_DIR}/iiod/*.xml COMPILED_RESOURCES)
+
 add_executable(${PROJECT_NAME}
         main.cpp
-        ${SRC_LIST})
+        ${SRC_LIST}
+        ${COMPILED_RESOURCES})
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${LIBXML2_INCLUDE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/resources
         )
 
 if (WIN32 OR CYGWIN OR MINGW)
