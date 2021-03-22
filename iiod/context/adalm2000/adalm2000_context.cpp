@@ -39,15 +39,39 @@
 
 #include "adalm2000_context.hpp"
 
+#include "utils/attr_ops_xml.hpp"
+#include "utils/utility.hpp"
+
 #include <adalm2000_xml.h>
 #include <libxml/tree.h>
 
 using namespace iio_emu;
 
+enum CALIBRATION_COEFFICIENT
+{
+	DAC_OFFSET_POS = 0,
+	DAC_GAIN_POS = 1,
+	ADC_OFFSET_POS = 2,
+	ADC_GAIN_POS = 3,
+	DAC_OFFSET_NEG = 4,
+	DAC_GAIN_NEG = 5,
+	ADC_OFFSET_NEG = 6,
+	ADC_GAIN_NEG = 7
+};
+
 Adalm2000Context::Adalm2000Context()
 	: GenericXmlContext(reinterpret_cast<const char*>(adalm2000_xml), sizeof(adalm2000_xml))
 {
 	assignBasicOps();
+
+	loadPSCalibCoef();
+
+	m_ps_write_coefficients.push_back(4095.0 / (5.02 * 1.2));
+	m_ps_write_coefficients.push_back(4095.0 / (-5.1 * 1.2));
+	m_ps_read_coefficients.push_back(6.4 / 4095.0);
+	m_ps_read_coefficients.push_back((-6.4) / 4095.0);
+
+	m_ps_current_values = std::vector<std::string>(2);
 }
 
 Adalm2000Context::~Adalm2000Context()
@@ -66,4 +90,87 @@ Adalm2000Context::~Adalm2000Context()
 		delete dev;
 		dev = nullptr;
 	}
+}
+
+ssize_t Adalm2000Context::chWriteAttr(const char* device_id, const char* channel, bool ch_out, const char* attr,
+				      const char* buf, size_t len)
+{
+	auto ret = GenericXmlContext::chWriteAttr(device_id, channel, ch_out, attr, buf, len);
+	if (!strncmp(device_id, "iio:device3", sizeof("iio:device3") - 1)) {
+
+		std::string channelRead;
+		unsigned short channelIdx;
+
+		if (!strncmp(channel, "voltage0", sizeof("voltage0") - 1)) {
+			channelIdx = 0;
+			channelRead = "voltage2";
+		} else {
+			channelIdx = 1;
+			channelRead = "voltage1";
+		}
+
+		if (!strncmp(attr, "raw", sizeof("raw") - 1)) {
+			auto voltage = convertPSDACRawToVolts(channelIdx, std::stoi(buf));
+			auto result = convertPSADCVoltsToRaw(channelIdx, voltage);
+			m_ps_current_values.at(channelIdx) = std::to_string(result);
+		}
+
+		char buffer[IIOD_BUFFER_SIZE];
+		read_channel_attr(m_doc, device_id, channel, ch_out, "powerdown", buffer, IIOD_BUFFER_SIZE);
+
+		if (!strncmp(buffer, "1", 1)) {
+			GenericXmlContext::chWriteAttr("iio:device13", channelRead.c_str(), false, "raw", "0", 1);
+		} else {
+			GenericXmlContext::chWriteAttr("iio:device13", channelRead.c_str(), false, "raw",
+						       m_ps_current_values.at(channelIdx).c_str(),
+						       m_ps_current_values.at(channelIdx).size());
+		}
+	}
+	return ret;
+}
+
+void Adalm2000Context::loadPSCalibCoef()
+{
+	m_ps_calib_coefficients.clear();
+	m_ps_calib_coefficients.reserve(8);
+
+	char buf[IIOD_BUFFER_SIZE];
+	std::vector<std::string> calibAttrs = {"cal,offset_pos_dac", "cal,gain_pos_dac",   "cal,offset_pos_adc",
+					       "cal,gain_pos_adc",   "cal,offset_neg_dac", "cal,gain_neg_dac",
+					       "cal,offset_neg_adc", "cal,gain_neg_adc"};
+
+	for (auto& attrName : calibAttrs) {
+		read_context_attr(m_doc, attrName.c_str(), buf, IIOD_BUFFER_SIZE);
+		m_ps_calib_coefficients.push_back(safe_stod(buf));
+	}
+}
+
+double Adalm2000Context::convertPSDACRawToVolts(unsigned short channel, int value) const
+{
+	double offset, gain;
+
+	if (channel == 0) {
+		offset = m_ps_calib_coefficients.at(DAC_OFFSET_POS);
+		gain = m_ps_calib_coefficients.at(DAC_GAIN_POS);
+	} else {
+		offset = m_ps_calib_coefficients.at(DAC_OFFSET_NEG);
+		gain = m_ps_calib_coefficients.at(DAC_GAIN_NEG);
+	}
+
+	return ((value / gain) - offset) / m_ps_write_coefficients.at(channel);
+}
+
+int Adalm2000Context::convertPSADCVoltsToRaw(unsigned short channel, double value) const
+{
+	double offset, gain;
+
+	if (channel == 0) {
+		offset = m_ps_calib_coefficients.at(ADC_OFFSET_POS);
+		gain = m_ps_calib_coefficients.at(ADC_GAIN_POS);
+	} else {
+		offset = m_ps_calib_coefficients.at(ADC_OFFSET_NEG);
+		gain = m_ps_calib_coefficients.at(ADC_GAIN_NEG);
+	}
+
+	return static_cast<int>(((value / gain) - offset) / m_ps_read_coefficients.at(channel));
 }

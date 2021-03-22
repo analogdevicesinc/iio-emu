@@ -42,6 +42,9 @@
 
 #include "iiod/context/generic_xml/generic_xml_context.hpp"
 
+#include <string>
+#include <vector>
+
 namespace iio_emu {
 
 class Adalm2000Context : public GenericXmlContext
@@ -49,6 +52,20 @@ class Adalm2000Context : public GenericXmlContext
 public:
 	Adalm2000Context();
 	~Adalm2000Context() override;
+
+	ssize_t chWriteAttr(const char* device_id, const char* channel, bool ch_out, const char* attr, const char* buf,
+			    size_t len) override;
+
+private:
+	void loadPSCalibCoef();
+	double convertPSDACRawToVolts(unsigned short channel, int value) const;
+	int convertPSADCVoltsToRaw(unsigned short channel, double value) const;
+
+private:
+	std::vector<double> m_ps_calib_coefficients;
+	std::vector<double> m_ps_write_coefficients;
+	std::vector<double> m_ps_read_coefficients;
+	std::vector<std::string> m_ps_current_values;
 };
 } // namespace iio_emu
 #endif // IIO_EMU_ADALM2000_CONTEXT_HPP
