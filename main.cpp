@@ -38,6 +38,7 @@
  */
 
 #include "networking/tcp_server.hpp"
+#include "utils/logger.hpp"
 
 #include <iostream>
 #include <vector>
@@ -45,10 +46,10 @@
 int main(int argc, char* argv[])
 {
 	if (argc < 2) {
-		std::cerr << "No server type provided" << std::endl;
+		iio_emu::Logger::log(iio_emu::IIO_EMU_FATAL, {"No server type provided"});
 		exit(1);
 	}
-	std::cout << "Virtual device: " << argv[1] << std::endl;
+	iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"Virtual device: ", argv[1]});
 
 	std::vector<const char*> args;
 	for (int i = 2; i < argc; i++) {

@@ -41,6 +41,8 @@
 
 #include "socket_unix.hpp"
 
+#include "utils/logger.hpp"
+
 #include <cerrno>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -59,12 +61,17 @@ size_t SocketUnix::getData(size_t len, char* buf)
 	while (true) {
 		ret = recv(m_fd, buf, len, 0);
 		if (ret < 0 && errno == EAGAIN) {
+			Logger::log(IIO_EMU_DEBUG, {"Read socket again: ", std::to_string(m_fd)});
 			continue;
 		}
 		if (ret <= 0) {
+			if (ret < 0) {
+				Logger::log(IIO_EMU_ERROR, {"Socket read: ", std::to_string(errno)});
+			}
 			buf[0] = '\0';
 			len = 0;
 			close(m_fd);
+			Logger::log(IIO_EMU_DEBUG, {"Close socket: ", std::to_string(m_fd)});
 			m_disconnected = true;
 		}
 		break;
@@ -79,10 +86,13 @@ void SocketUnix::write(const char* buf, size_t len)
 	while (true) {
 		ret = send(m_fd, buf, len, 0);
 		if (ret < 0 && errno == EAGAIN) {
+			Logger::log(IIO_EMU_DEBUG, {"Write socket again: ", std::to_string(m_fd)});
 			continue;
 		}
 		if (ret < 0) {
+			Logger::log(IIO_EMU_ERROR, {"Socket write: ", std::to_string(errno)});
 			close(m_fd);
+			Logger::log(IIO_EMU_DEBUG, {"Close socket: ", std::to_string(m_fd)});
 			m_disconnected = true;
 		}
 		break;

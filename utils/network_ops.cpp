@@ -40,6 +40,7 @@
 #include "network_ops.hpp"
 
 #include "networking/abstract_socket.hpp"
+#include "utils/logger.hpp"
 
 #include <cstring>
 
@@ -48,5 +49,6 @@ ssize_t iio_emu::socket_read(AbstractSocket* socket, void* buf, size_t len)
 	char dataReceived[IIOD_BUFFER_SIZE];
 	auto size = socket->getData(len, dataReceived);
 	memcpy(buf, dataReceived, size);
+	Logger::log(IIO_EMU_DEBUG, {"Socket read data: ", dataReceived});
 	return static_cast<ssize_t>(size);
 }

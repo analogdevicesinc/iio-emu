@@ -41,6 +41,8 @@
 
 #include "socket_win.hpp"
 
+#include "utils/logger.hpp"
+
 #include <cerrno>
 #include <winsock.h>
 #include <winsock2.h>
@@ -61,11 +63,16 @@ size_t SocketWin::getData(size_t len, char* buf)
 		if (ret <= 0) {
 			auto error = WSAGetLastError();
 			if (error == WSAEWOULDBLOCK || error == WSAETIMEDOUT) {
+				Logger::log(IIO_EMU_DEBUG, {"Read socket again: ", std::to_string(m_fd)});
 				continue;
+			}
+			if (ret < 0) {
+				Logger::log(IIO_EMU_ERROR, {"Socket read: ", std::to_string(error)});
 			}
 			buf[0] = '\0';
 			len = 0;
 			closesocket(m_fd);
+			Logger::log(IIO_EMU_DEBUG, {"Close socket: ", std::to_string(m_fd)});
 			m_disconnected = true;
 		}
 		break;
@@ -81,9 +88,13 @@ void SocketWin::write(const char* buf, size_t len)
 		if (ret < 0) {
 			auto error = WSAGetLastError();
 			if (error == WSAEWOULDBLOCK || error == WSAETIMEDOUT) {
+				Logger::log(IIO_EMU_DEBUG, {"Write socket again: ", std::to_string(m_fd)});
 				continue;
+			} else {
+				Logger::log(IIO_EMU_ERROR, {"Socket write: ", std::to_string(error)});
 			}
 			closesocket(m_fd);
+			Logger::log(IIO_EMU_DEBUG, {"Close socket: ", std::to_string(m_fd)});
 			m_disconnected = true;
 		}
 		break;

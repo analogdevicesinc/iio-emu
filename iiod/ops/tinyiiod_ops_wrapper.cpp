@@ -40,6 +40,7 @@
 #include "tinyiiod_ops_wrapper.hpp"
 
 #include "abstract_ops.hpp"
+#include "utils/logger.hpp"
 
 using namespace iio_emu;
 
@@ -52,6 +53,7 @@ ssize_t iio_emu::read(char* buf, size_t len)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod read"});
 	return g_ops->readData(buf, len);
 }
 
@@ -60,6 +62,7 @@ ssize_t iio_emu::write(const char* buf, size_t len)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod write"});
 	return g_ops->writeData(buf, len);
 }
 
@@ -68,6 +71,7 @@ ssize_t iio_emu::read_line(char* buf, size_t len)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod readline"});
 	return g_ops->readLine(buf, len);
 }
 
@@ -76,6 +80,7 @@ ssize_t iio_emu::open_instance()
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod open_instance"});
 	return g_ops->openInstance();
 }
 
@@ -84,6 +89,7 @@ ssize_t iio_emu::close_instance()
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod close_instance"});
 	return g_ops->closeInstance();
 }
 
@@ -92,6 +98,7 @@ ssize_t iio_emu::read_attr(const char* device_id, const char* attr, char* buf, s
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod read_attr: ", attr});
 	return g_ops->readAttr(device_id, attr, buf, len, type);
 }
 
@@ -101,6 +108,7 @@ ssize_t iio_emu::write_attr(const char* device_id, const char* attr, const char*
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod write_attr: ", attr});
 	return g_ops->writeAttr(device_id, attr, buf, len, type);
 }
 
@@ -110,6 +118,7 @@ ssize_t iio_emu::ch_read_attr(const char* device_id, const char* channel, bool c
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod ch_read_attr: ", attr});
 	return g_ops->chReadAttr(device_id, channel, ch_out, attr, buf, len);
 }
 
@@ -119,6 +128,7 @@ ssize_t iio_emu::ch_write_attr(const char* device_id, const char* channel, bool 
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod ch_write_attr: ", attr});
 	return g_ops->chWriteAttr(device_id, channel, ch_out, attr, buf, len);
 }
 
@@ -127,6 +137,7 @@ int32_t iio_emu::open(const char* device, size_t sample_size, uint32_t mask, boo
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod open"});
 	return g_ops->openDev(device, sample_size, mask, cyclic);
 }
 
@@ -135,6 +146,7 @@ int32_t iio_emu::close(const char* device)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod close"});
 	return g_ops->closeDev(device);
 }
 
@@ -143,6 +155,7 @@ ssize_t iio_emu::transfer_dev_to_mem(const char* device, size_t bytes_count)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod transfer_dev_to_mem: ", std::to_string(bytes_count)});
 	return g_ops->transferDevToMem(device, bytes_count);
 }
 
@@ -151,6 +164,7 @@ ssize_t iio_emu::read_data(const char* device, char* pbuf, size_t offset, size_t
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod read_data: ", std::to_string(bytes_count)});
 	return g_ops->readDev(device, pbuf, offset, bytes_count);
 }
 
@@ -159,6 +173,7 @@ ssize_t iio_emu::transfer_mem_to_dev(const char* device, size_t bytes_count)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod transfer_mem_to_dev: ", std::to_string(bytes_count)});
 	return g_ops->transferMemToDev(device, bytes_count);
 }
 
@@ -167,6 +182,7 @@ ssize_t iio_emu::write_data(const char* device, const char* buf, size_t offset, 
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod write_data: ", std::to_string(bytes_count)});
 	return g_ops->writeDev(device, buf, offset, bytes_count);
 }
 
@@ -175,6 +191,7 @@ int32_t iio_emu::get_mask(const char* device, uint32_t* mask)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod get_mask"});
 	return g_ops->getMask(device, mask);
 }
 
@@ -183,6 +200,7 @@ int32_t iio_emu::set_timeout(uint32_t timeout)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod set_timeout: ", std::to_string(timeout)});
 	return g_ops->setTimeout(timeout);
 }
 
@@ -191,6 +209,7 @@ int32_t iio_emu::set_buffers_count(const char* device, uint32_t buffers_count)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod set_buffers_count: ", std::to_string(buffers_count)});
 	return g_ops->setBuffersCount(device, buffers_count);
 }
 
@@ -199,5 +218,6 @@ ssize_t iio_emu::get_xml(char** outxml)
 	if (g_ops == nullptr) {
 		return -ENOENT;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod get_xml"});
 	return g_ops->getXml(outxml);
 }

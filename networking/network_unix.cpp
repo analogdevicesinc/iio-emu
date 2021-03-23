@@ -41,6 +41,8 @@
 
 #include "network_unix.hpp"
 
+#include "utils/logger.hpp"
+
 #include <algorithm>
 #include <cerrno>
 #include <fcntl.h>
@@ -60,15 +62,21 @@ int NetworkUnix::open()
 	int yes = 1;
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_listenSocket <= 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket creation"});
 		return -1;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Open socket: ", std::to_string(m_listenSocket)});
 
+	Logger::log(IIO_EMU_DEBUG, {"Set socket nonblock"});
 	if (fcntl(m_listenSocket, F_SETFL, O_NONBLOCK) < 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket set nonblock"});
 		close();
 		return -1;
 	}
 
+	Logger::log(IIO_EMU_DEBUG, {"Set socket reuseaddr"});
 	if (setsockopt(m_listenSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket set reuseaddr"});
 		close();
 		return -1;
 	}
@@ -81,6 +89,7 @@ int NetworkUnix::close()
 		return -1;
 	}
 
+	Logger::log(IIO_EMU_DEBUG, {"Close socket"});
 	::close(m_listenSocket);
 	return 0;
 }
@@ -96,7 +105,10 @@ int NetworkUnix::bind(uint16_t port)
 	m_address->sin_family = AF_INET;
 	m_address->sin_addr.s_addr = INADDR_ANY;
 	m_address->sin_port = htons(port);
+
+	Logger::log(IIO_EMU_DEBUG, {"Bind socket"});
 	if (::bind(m_listenSocket, reinterpret_cast<struct sockaddr*>(m_address), addrlen) < 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket bind"});
 		close();
 		return -1;
 	}
@@ -108,7 +120,10 @@ int NetworkUnix::listen(int backlog)
 	if (m_listenSocket <= 0) {
 		return -1;
 	}
+
+	Logger::log(IIO_EMU_DEBUG, {"Listen socket"});
 	if (::listen(m_listenSocket, backlog) < 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket listen"});
 		close();
 		return -1;
 	}
@@ -128,6 +143,7 @@ int NetworkUnix::accept(int* clientSocket)
 	if (*clientSocket < 0) {
 		return -EAGAIN;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Accept socket: ", std::to_string(*clientSocket)});
 
 	ret = setsockopt(static_cast<int>(*clientSocket), SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
 	if (ret < 0) {
@@ -186,6 +202,7 @@ int NetworkUnix::checkForNewConnections()
 			close();
 			return ret;
 		}
+		Logger::log(IIO_EMU_DEBUG, {"Select new socket: ", std::to_string(new_socket)});
 		clients.push_back(new_socket);
 	}
 	return 0;
@@ -204,6 +221,7 @@ std::vector<int> NetworkUnix::getActiveConnections()
 
 void NetworkUnix::disconnectSocket(int socket)
 {
+	Logger::log(IIO_EMU_DEBUG, {"Disconnect socket: ", std::to_string(socket)});
 	clients.erase(std::remove(clients.begin(), clients.end(), socket), clients.end());
 }
 

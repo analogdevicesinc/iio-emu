@@ -49,6 +49,7 @@
 #include "network_win.hpp"
 #include "socket_win.hpp"
 #endif
+#include "utils/logger.hpp"
 #include "utils/utility.hpp"
 
 #include <csignal>
@@ -71,7 +72,7 @@ TcpServer::TcpServer(const char* type, std::vector<const char*>& args)
 	FactoryOps factory;
 	m_ops = factory.buildOps(type, args);
 	if (m_ops == nullptr) {
-		std::cerr << "No such device" << std::endl;
+		Logger::log(IIO_EMU_FATAL, {"No such device"});
 		exit(1);
 	}
 	m_iiod = tinyiiod_create(m_ops->getIIODOps());
@@ -114,30 +115,30 @@ bool TcpServer::start()
 	// create listen socket
 	ret = networkInterface->open();
 	if (ret < 0) {
-		std::cerr << "Socket cannot be created: " << strerror(errno) << std::endl;
+		Logger::log(IIO_EMU_FATAL, {"Socket cannot be created: ", strerror(errno)});
 		delete networkInterface;
 		return false;
 	}
 
 	ret = networkInterface->bind(PORT);
 	if (ret < 0) {
-		std::cerr << "Bind failed: " << strerror(errno) << std::endl;
+		Logger::log(IIO_EMU_FATAL, {"Bind failed: ", strerror(errno)});
 		delete networkInterface;
 		return false;
 	}
 
 	ret = networkInterface->listen(BACKLOG);
 	if (ret < 0) {
-		std::cerr << "Listen failed: " << strerror(errno) << std::endl;
+		Logger::log(IIO_EMU_FATAL, {"Listen failed: ", strerror(errno)});
 		delete networkInterface;
 		return false;
 	}
-	std::cout << "Waiting for connections ..." << std::endl;
+	Logger::log(IIO_EMU_INFO, {"Waiting for connections ..."});
 
 	while (running) {
 		ret = networkInterface->checkForNewConnections();
 		if (ret < 0) {
-			std::cerr << "New connection failed: " << strerror(errno) << std::endl;
+			Logger::log(IIO_EMU_FATAL, {"New connection failed: ", strerror(errno)});
 			errorOccured = true;
 			break;
 		}
@@ -150,6 +151,7 @@ bool TcpServer::start()
 #else
 			SocketWin socket(client);
 #endif
+			Logger::log(IIO_EMU_DEBUG, {"Current socket: ", std::to_string(socket.getDescriptor())});
 			m_ops->setCurrentSocket(&socket);
 			tinyiiod_read_command(m_iiod);
 			if (socket.disconnected()) {
@@ -162,7 +164,7 @@ bool TcpServer::start()
 		networkInterface->close();
 	}
 	delete networkInterface;
-	std::cout << "Server stopped" << std::endl;
+	Logger::log(IIO_EMU_INFO, {"Server stopped"});
 	return !errorOccured;
 }
 

@@ -41,6 +41,8 @@
 
 #include "network_win.hpp"
 
+#include "utils/logger.hpp"
+
 #include <algorithm>
 #include <cerrno>
 #include <winsock.h>
@@ -63,18 +65,22 @@ int NetworkWin::open()
 
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_listenSocket == INVALID_SOCKET) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket creation"});
 		WSACleanup();
 		return -1;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Open socket: ", std::to_string(m_listenSocket)});
 
 	bool yes = TRUE;
 	if (setsockopt(m_listenSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char*>(&yes), sizeof(yes)) < 0) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket set reuseaddr"});
 		close();
 		return -1;
 	}
 
 	u_long nonBlock = 1;
 	if (ioctlsocket(m_listenSocket, static_cast<long>(FIONBIO), &nonBlock) == SOCKET_ERROR) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket set nonblock"});
 		close();
 		return -1;
 	}
@@ -86,6 +92,7 @@ int NetworkWin::close()
 	if (m_listenSocket == INVALID_SOCKET) {
 		return -1;
 	}
+	Logger::log(IIO_EMU_DEBUG, {"Close socket"});
 	closesocket(m_listenSocket);
 	WSACleanup();
 	return 0;
@@ -103,7 +110,9 @@ int NetworkWin::bind(uint16_t port)
 	m_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_address.sin_port = htons(port);
 
+	Logger::log(IIO_EMU_DEBUG, {"Bind socket"});
 	if (::bind(m_listenSocket, reinterpret_cast<PSOCKADDR>(&m_address), addrlen) == SOCKET_ERROR) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket bind"});
 		close();
 		return -1;
 	}
@@ -115,7 +124,10 @@ int NetworkWin::listen(int backlog)
 	if (m_listenSocket == INVALID_SOCKET) {
 		return -1;
 	}
+
+	Logger::log(IIO_EMU_DEBUG, {"Listen socket"});
 	if (::listen(m_listenSocket, backlog) == SOCKET_ERROR) {
+		Logger::log(IIO_EMU_ERROR, {"Failed socket listen"});
 		close();
 		return -1;
 	}
@@ -136,6 +148,7 @@ int NetworkWin::accept(SOCKET* clientSocket)
 		return -1;
 	}
 
+	Logger::log(IIO_EMU_DEBUG, {"Accept socket: ", std::to_string(*clientSocket)});
 	bool yes = TRUE;
 	ret = setsockopt(*clientSocket, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<char*>(&yes), sizeof(yes));
 	if (ret < 0) {
@@ -181,6 +194,7 @@ int NetworkWin::checkForNewConnections()
 			close();
 			return ret;
 		}
+		Logger::log(IIO_EMU_DEBUG, {"Select new socket: ", std::to_string(new_socket)});
 		clients.push_back(new_socket);
 	}
 	return 0;
@@ -199,6 +213,7 @@ std::vector<int> NetworkWin::getActiveConnections()
 
 void NetworkWin::disconnectSocket(int socket)
 {
+	Logger::log(IIO_EMU_DEBUG, {"Disconnect socket: ", std::to_string(socket)});
 	clients.erase(std::remove(clients.begin(), clients.end(), socket), clients.end());
 }
 
