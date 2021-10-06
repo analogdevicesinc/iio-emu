@@ -35,91 +35,25 @@
 #  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 #  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 cmake_minimum_required(VERSION 3.1.3)
-project(iio-emu LANGUAGES CXX)
+project(xml_gen LANGUAGES C)
 
-include(cmake/compileResources.cmake)
-include(cmake/compilerWarnings.cmake)
-include(cmake/staticAnalyzers.cmake)
-
-set(CMAKE_CXX_STANDARD 11)
-
-set(IIO_EMU_VERSION_MAJOR 0)
-set(IIO_EMU_VERSION_MINOR 1)
-set(IIO_EMU_VERSION ${IIO_EMU_VERSION_MAJOR}.${IIO_EMU_VERSION_MINOR})
-
-option(BUILD_TOOLS "Build the tools" OFF)
-
-# Set the default install path to /usr/local
-if (NOT WIN32 AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "default install path" FORCE)
-endif()
-
-include(GNUInstallDirs)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif()
-
-find_package(tinyiiod REQUIRED)
-find_package(LibXml2 REQUIRED)
-
-FILE(GLOB_RECURSE SRC_LIST
-        iiod/*.cpp
-        networking/*.cpp
-        utils/*.cpp)
-
-FILE(GLOB_RECURSE RESOURCES_LIST
-        iiod/*.xml)
-
-get_resources(${CMAKE_CURRENT_SOURCE_DIR}/iiod/*.xml COMPILED_RESOURCES)
+find_library(IIO_LIBRARIES NAMES iio libiio)
+find_path(IIO_INCLUDE_DIRS iio.h)
 
 add_executable(${PROJECT_NAME}
-        main.cpp
-        ${SRC_LIST}
-        ${COMPILED_RESOURCES})
-
-if (NOT DEFINED IIO_EMU_LOG_LEVEL)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE IIO_EMU_LOG_LEVEL=1)
-    message(STATUS "Logging level: 1")
-else()
-    target_compile_definitions(${PROJECT_NAME} PRIVATE IIO_EMU_LOG_LEVEL=${IIO_EMU_LOG_LEVEL})
-    message(STATUS "Logging level: ${IIO_EMU_LOG_LEVEL}")
-endif()
+	genxml.c)
 
 target_include_directories(${PROJECT_NAME}
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${LIBXML2_INCLUDE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/resources
-        )
-
-if (WIN32 OR CYGWIN OR MINGW)
-    target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
-endif()
+	PRIVATE
+	${IIO_INCLUDE_DIRS}
+	${LIBXML2_INCLUDE_DIR}
+	)
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        tinyiiod::tinyiiod
-        ${LIBXML2_LIBRARIES}
-        )
-
-set_warnings(${PROJECT_NAME})
-
-if (NOT WIN32)
-    find_library(PTHREAD_LIBRARIES pthread)
-    if (PTHREAD_LIBRARIES)
-        target_link_libraries(${PROJECT_NAME}
-                PRIVATE
-                ${PTHREAD_LIBRARIES}
-                )
-    endif()
-endif()
-
-if (BUILD_TOOLS)
-    message(STATUS "Building tools")
-    add_subdirectory(tools)
-endif()
+	PRIVATE
+	${IIO_LIBRARIES}
+	${LIBXML2_LIBRARIES}
+	)
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

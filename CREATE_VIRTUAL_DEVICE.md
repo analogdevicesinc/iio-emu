@@ -5,7 +5,12 @@
 The first step is defining the structure of your context. Any context can be represented
 as an XML file, similar to the one that libiio is extracting from the context. The only
 difference between libiio and iio-emu XML file is that iio-emu XML contains the attribute
-'value' for all end-nodes. An example of a valid XML file:
+'value' for all end-nodes.
+
+'xml_gen' is a utility that generates a well-formatted xml, ready to be use by the emulator.
+Please have a look at [instructions](tools/README.md)
+
+An example of a valid XML file:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
