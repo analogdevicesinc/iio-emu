@@ -37,25 +37,30 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_XML_UTILS_HPP
-#define IIO_EMU_XML_UTILS_HPP
+#include "input_parser.hpp"
 
-#include <tinyiiod/tinyiiod.h>
+using namespace iio_emu;
 
-struct _xmlDoc;
-struct _xmlNode;
+const char* InputParser::getXMLPath(std::vector<const char*>& args)
+{
+	for (auto arg : args) {
+		if (std::string(arg).find(':') == std::string::npos) {
+			return arg;
+		}
+	}
+	return nullptr;
+}
 
-namespace iio_emu {
+std::vector<std::pair<const std::string, const std::string>> InputParser::getDevices(std::vector<const char*>& args)
+{
+	std::vector<std::pair<const std::string, const std::string>> devices;
 
-struct _xmlNode* getNode(struct _xmlNode* root, const char* node_name, const char* attr_name, const char* attr_value);
-
-struct _xmlNode* getNode(struct _xmlNode* root, const char* node_name);
-
-struct _xmlNode* getDeviceAttr(struct _xmlDoc* doc, const char* dev, enum iio_attr_type type, const char* attr);
-
-struct _xmlNode* getChannelAttr(struct _xmlDoc* doc, const char* chn, const char* dev, const char* attr, bool ch_out);
-
-ssize_t getXml(struct _xmlDoc* doc, char** buf);
-
-} // namespace iio_emu
-#endif // IIO_EMU_XML_UTILS_HPP
+	for (auto arg : args) {
+		std::string str(arg);
+		auto index = str.find('@');
+		if (index != std::string::npos) {
+			devices.emplace_back(str.substr(0, index), str.substr(index + 1, str.length() - index));
+		}
+	}
+	return devices;
+}

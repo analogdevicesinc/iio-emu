@@ -37,25 +37,22 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IIO_EMU_XML_UTILS_HPP
-#define IIO_EMU_XML_UTILS_HPP
+#ifndef IIO_EMU_INPUT_PARSER_HPP
+#define IIO_EMU_INPUT_PARSER_HPP
 
-#include <tinyiiod/tinyiiod.h>
-
-struct _xmlDoc;
-struct _xmlNode;
+#include <string>
+#include <vector>
 
 namespace iio_emu {
 
-struct _xmlNode* getNode(struct _xmlNode* root, const char* node_name, const char* attr_name, const char* attr_value);
+class InputParser
+{
 
-struct _xmlNode* getNode(struct _xmlNode* root, const char* node_name);
+public:
+	static const char* getXMLPath(std::vector<const char*>& args);
 
-struct _xmlNode* getDeviceAttr(struct _xmlDoc* doc, const char* dev, enum iio_attr_type type, const char* attr);
-
-struct _xmlNode* getChannelAttr(struct _xmlDoc* doc, const char* chn, const char* dev, const char* attr, bool ch_out);
-
-ssize_t getXml(struct _xmlDoc* doc, char** buf);
-
+	static std::vector<std::pair<const std::string, const std::string>> getDevices(std::vector<const char*>& args);
+};
 } // namespace iio_emu
-#endif // IIO_EMU_XML_UTILS_HPP
+
+#endif // IIO_EMU_INPUT_PARSER_HPP

@@ -1,6 +1,9 @@
 
 # Creating your own virtual device
 
+The instructions below are for creating custom behaviors for the emulator. If you are
+looking for the simplest way to use the emulator please have a look at the [generic interface](GENERIC_EMULATOR.md).
+
 ## Define context structure
 The first step is defining the structure of your context. Any context can be represented
 as an XML file, similar to the one that libiio is extracting from the context. The only

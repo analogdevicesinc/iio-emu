@@ -54,7 +54,7 @@ class GenericXmlContext : public AbstractOps
 {
 
 public:
-	explicit GenericXmlContext(const char* xmlPath);
+	explicit GenericXmlContext(std::vector<const char*>& args);
 	GenericXmlContext(const char* file, int fileSize);
 	~GenericXmlContext() override;
 
@@ -114,6 +114,9 @@ protected:
 	 */
 	void assignAllOps();
 
+	bool isOutputChannel(const char* device_id);
+	bool isInputChannel(const char* device_id);
+
 protected:
 	struct _xmlDoc* m_doc;
 	AbstractSocket* m_current_socket;
@@ -125,6 +128,8 @@ protected:
 
 private:
 	AbstractDevice* getDevice(int fd);
+
+	bool isScanChannel(const char* device_id);
 };
 } // namespace iio_emu
 

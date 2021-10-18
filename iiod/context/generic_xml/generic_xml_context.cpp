@@ -45,17 +45,36 @@
 #include "iiod/ops/tinyiiod_ops_wrapper.hpp"
 #include "networking/abstract_socket.hpp"
 #include "utils/attr_ops_xml.hpp"
+#include "utils/input_parser.hpp"
 #include "utils/network_ops.hpp"
 #include "utils/utility.hpp"
 
+#include <iiod/context/generic_xml/devices/generic_rx_device.hpp>
+#include <iiod/context/generic_xml/devices/generic_tx_device.hpp>
 #include <libxml/tree.h>
 
 using namespace iio_emu;
 
-GenericXmlContext::GenericXmlContext(const char* xmlPath)
+GenericXmlContext::GenericXmlContext(std::vector<const char*>& args)
 {
+	auto xmlPath = InputParser::getXMLPath(args);
+	auto devices = InputParser::getDevices(args);
+
+	// TODO: check xmlPath
 	m_doc = xmlReadFile(xmlPath, nullptr, XML_PARSE_DTDVALID);
 	m_xml_size = iio_emu::getXml(m_doc, &m_ctx_xml);
+
+	for (const auto& devInfo : devices) {
+		if (isScanChannel(devInfo.first.c_str())) {
+			AbstractDevice* dev;
+			if (isOutputChannel(devInfo.first.c_str())) {
+				dev = new GenericTXDevice(devInfo.first.c_str(), devInfo.second.c_str());
+			} else {
+				dev = new GenericRXDevice(devInfo.first.c_str(), devInfo.second.c_str());
+			}
+			addDevice(dev);
+		}
+	}
 
 	assignBasicOps();
 }
@@ -317,4 +336,65 @@ AbstractDevice* GenericXmlContext::getDevice(int fd)
 		}
 	}
 	return device;
+}
+
+bool GenericXmlContext::isScanChannel(const char* device_id)
+{
+	xmlNode *root, *node_device, *node_channel, *node_attr;
+
+	root = xmlDocGetRootElement(m_doc);
+	if (root == nullptr) {
+		return false;
+	}
+
+	node_device = getNode(root, "device", "id", device_id);
+	if (node_device == nullptr) {
+		return false;
+	}
+
+	for (node_channel = node_device->children; node_channel; node_channel = node_channel->next) {
+		if (!strcmp(reinterpret_cast<const char*>(node_channel->name), "channel")) {
+			node_attr = getNode(node_channel, "scan-element");
+			if (node_attr) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool GenericXmlContext::isOutputChannel(const char* device_id)
+{
+	if (!isScanChannel(device_id)) {
+		return false;
+	}
+
+	xmlNode *root, *node_device, *node_attr;
+
+	root = xmlDocGetRootElement(m_doc);
+	if (root == nullptr) {
+		return false;
+	}
+
+	node_device = getNode(root, "device", "id", device_id);
+	if (node_device == nullptr) {
+		return false;
+	}
+
+	node_attr = getNode(node_device, "channel", "type", "input");
+	if (node_attr == nullptr) {
+		return true;
+	}
+
+	return false;
+}
+
+bool GenericXmlContext::isInputChannel(const char* device_id)
+{
+	if (!isScanChannel(device_id)) {
+		return false;
+	}
+
+	return !isOutputChannel(device_id);
 }
