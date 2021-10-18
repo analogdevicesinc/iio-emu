@@ -67,6 +67,18 @@ struct _xmlNode* iio_emu::getNode(struct _xmlNode* root, const char* node_name, 
 	return nullptr;
 }
 
+struct _xmlNode* iio_emu::getNode(struct _xmlNode* root, const char* node_name)
+{
+	xmlNode* node = nullptr;
+
+	for (node = root->children; node; node = node->next) {
+		if (!strcmp(reinterpret_cast<const char*>(node->name), node_name)) {
+			return node;
+		}
+	}
+	return nullptr;
+}
+
 static xmlNode* getNodeNAttrs(xmlNode* root, const char* node_name, const char** attr_name, const char** attr_value,
 			      size_t len)
 {

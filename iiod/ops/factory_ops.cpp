@@ -43,17 +43,20 @@
 #include "iiod/context/adalm2000/adalm2000_context.hpp"
 #include "iiod/context/generic_xml/generic_xml_context.hpp"
 
+#include <utils/logger.hpp>
+
 using namespace iio_emu;
 
 AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& args)
 {
 	AbstractOps* iiodOpsAbstract;
 
-	if (!strncmp(type, "generic_xml", sizeof("generic_xml") - 1)) {
+	if (!strncmp(type, "generic", sizeof("generic") - 1)) {
 		if (args.empty()) {
+			Logger::log(IIO_EMU_FATAL, {"XML path required"});
 			return nullptr;
 		}
-		iiodOpsAbstract = new GenericXmlContext(args.at(0));
+		iiodOpsAbstract = new GenericXmlContext(args);
 	} else if (!strncmp(type, "adalm2000", sizeof("adalm2000") - 1)) {
 		iiodOpsAbstract = new Adalm2000Context();
 	} else {
