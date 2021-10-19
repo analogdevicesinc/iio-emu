@@ -54,6 +54,12 @@ if (NOT WIN32 AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "default install path" FORCE)
 endif()
 
+include(GNUInstallDirs)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 find_package(tinyiiod REQUIRED)
 find_package(LibXml2 REQUIRED)
 
