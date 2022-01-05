@@ -1,0 +1,11 @@
+# support creating some basic binpkgs via `make package`
+
+set(CPACK_SET_DESTDIR ON)
+set(CPACK_GENERATOR TGZ)
+
+set(CPACK_PACKAGE_VERSION_MAJOR ${IIO_EMU_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${IIO_EMU_VERSION_MINOR})
+set(CPACK_BUNDLE_NAME iio-emu)
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+
+include(CPack)

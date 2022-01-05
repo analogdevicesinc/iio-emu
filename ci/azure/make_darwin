@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+TOP_DIR=$(pwd)
+
+mkdir -p build_tar
+
+cd ${TOP_DIR}/build_tar
+cmake -DENABLE_PACKAGING=ON -DOSX_PACKAGE=OFF -DBUILD_TOOLS=OFF ..
+make && make package
+ls
