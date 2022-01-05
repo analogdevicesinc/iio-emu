@@ -42,6 +42,12 @@
 
 #include "abstract_socket.hpp"
 
+#ifndef _SSIZE_T_DEFINED
+#define _SSIZE_T_DEFINED
+#undef ssize_t
+typedef long int ssize_t;
+#endif
+
 #include <winsock2.h>
 
 namespace iio_emu {
