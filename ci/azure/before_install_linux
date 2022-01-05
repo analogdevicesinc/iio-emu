@@ -1,0 +1,51 @@
+#!/bin/sh -e
+
+TOP_DIR=$(pwd)
+
+. ci/azure/lib.sh
+
+build_tinyiiod() {
+	cd ${TOP_DIR}
+	git clone --depth 1 https://github.com/analogdevicesinc/libtinyiiod/
+	mkdir -p libtinyiiod/build && cd libtinyiiod/build
+	cmake -DCMAKE_PREFIX_PATH=/usr -DBUILD_EXAMPLES=OFF ..
+	make
+	sudo make install
+	cd ${TOP_DIR}
+}
+
+handle_centos() {
+	yum -y group install "Development Tools"
+
+	yum -y install cmake libxml2-devel bzip2 gzip rpm rpm-build
+
+	build_tinyiiod
+}
+
+handle_generic_docker() {
+	prepare_docker_image
+}
+
+handle_default() {
+	sudo apt-get -qq update
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake \
+		build-essential libxml2-dev rpm tar bzip2 gzip git
+
+	build_tinyiiod
+}
+
+handle_ubuntu() {
+	handle_default
+}
+
+handle_debian() {
+	handle_default
+}
+
+handle_doxygen() {
+	handle_default
+}
+
+setup_build_type_env_vars
+
+handle_${BUILD_TYPE}

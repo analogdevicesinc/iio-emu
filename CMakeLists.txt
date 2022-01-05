@@ -122,4 +122,19 @@ if (BUILD_TOOLS)
     add_subdirectory(tools)
 endif()
 
+if (NOT OSX_PACKAGE)
+	# Support creating some basic binpkgs via `make package`.
+	# Disabled if OSX_PACKAGE is enabled, as tarballs would end up empty otherwise.
+	option(ENABLE_PACKAGING "Create .deb/.rpm or .tar.gz packages via 'make package'" OFF)
+
+	if(ENABLE_PACKAGING)
+		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			include(cmake/DarwinPackaging.cmake)
+		endif()
+		if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+			include(cmake/LinuxPackaging.cmake)
+		endif()
+	endif()
+endif()
+
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
