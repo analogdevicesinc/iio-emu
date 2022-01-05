@@ -1,0 +1,14 @@
+
+#!/bin/sh -e
+
+. ci/azure/lib.sh
+
+brew_install_if_not_exists cmake libxml2
+
+cd ${TOP_DIR}
+git clone --depth 1 https://github.com/analogdevicesinc/libtinyiiod/
+mkdir -p libtinyiiod/build && cd libtinyiiod/build
+cmake -DBUILD_EXAMPLES=OFF ..
+make
+sudo make install
+cd ${TOP_DIR}
