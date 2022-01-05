@@ -1,0 +1,42 @@
+#!/bin/sh -e
+
+TOP_DIR=$(pwd)
+
+. ci/azure/lib.sh
+
+handle_default() {
+	mkdir -p build
+	cd build
+
+	cmake -DENABLE_PACKAGING=ON -DDEB_DETECT_DEPENDENCIES=ON -DBUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+	make && make package
+	ls
+}
+
+handle_centos() {
+	mkdir -p build
+	cd build
+	cmake -DENABLE_PACKAGING=ON -DBUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+	make && make package
+	cd ..
+}
+
+handle_generic_docker() {
+	run_docker_script inside_docker.sh
+}
+
+handle_ubuntu() {
+	handle_default
+}
+
+handle_debian() {
+	handle_default
+}
+
+handle_generic_docker() {
+	run_docker_script inside_docker.sh
+}
+
+setup_build_type_env_vars
+
+handle_${BUILD_TYPE}
