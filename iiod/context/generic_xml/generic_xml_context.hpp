@@ -99,6 +99,9 @@ public:
 
 	int32_t setTimeout(uint32_t timeout) override;
 
+	int32_t getTrigger(const char* device, char* trigger, size_t len) override;
+	int32_t setTrigger(const char* device, const char* trigger, size_t len) override;
+
 	int32_t setBuffersCount(const char* device, uint32_t buffers_count) override;
 
 	ssize_t getXml(char** outxml) override;

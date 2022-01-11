@@ -245,6 +245,24 @@ int32_t GenericXmlContext::setTimeout(uint32_t timeout)
 	return -ENOENT;
 }
 
+int32_t GenericXmlContext::getTrigger(const char* device, char* trigger, size_t len)
+{
+	UNUSED(device);
+	UNUSED(trigger);
+	UNUSED(len);
+
+	return -ENOENT;
+}
+
+int32_t GenericXmlContext::setTrigger(const char* device, const char* trigger, size_t len)
+{
+	UNUSED(device);
+	UNUSED(trigger);
+	UNUSED(len);
+
+	return -ENOENT;
+}
+
 int32_t GenericXmlContext::setBuffersCount(const char* device, uint32_t buffers_count)
 {
 	AbstractDevice* abstractDevice = getDevice(device);
@@ -295,6 +313,9 @@ void GenericXmlContext::assignBasicOps()
 	m_iiodOps->get_mask = iio_emu::get_mask;
 	m_iiodOps->set_buffers_count = iio_emu::set_buffers_count;
 	m_iiodOps->get_xml = iio_emu::get_xml;
+
+	m_iiodOps->get_trigger = iio_emu::get_trigger;
+	m_iiodOps->set_trigger = iio_emu::set_trigger;
 }
 
 void GenericXmlContext::assignAllOps()
@@ -321,6 +342,10 @@ void GenericXmlContext::assignAllOps()
 
 	m_iiodOps->get_mask = iio_emu::get_mask;
 	m_iiodOps->set_timeout = iio_emu::set_timeout;
+
+	m_iiodOps->get_trigger = iio_emu::get_trigger;
+	m_iiodOps->set_trigger = iio_emu::set_trigger;
+
 	m_iiodOps->set_buffers_count = iio_emu::set_buffers_count;
 	m_iiodOps->get_xml = iio_emu::get_xml;
 }
