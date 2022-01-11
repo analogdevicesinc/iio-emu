@@ -204,6 +204,25 @@ int32_t iio_emu::set_timeout(uint32_t timeout)
 	return g_ops->setTimeout(timeout);
 }
 
+int32_t iio_emu::get_trigger(const char* device, char* trigger, size_t len)
+{
+	if (g_ops == nullptr) {
+		return -ENOENT;
+	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod get_trigger"});
+
+	return g_ops->getTrigger(device, trigger, len);
+}
+
+int32_t iio_emu::set_trigger(const char* device, const char* trigger, size_t len)
+{
+	if (g_ops == nullptr) {
+		return -ENOENT;
+	}
+	Logger::log(IIO_EMU_DEBUG, {"Tinyiiod set_trigger"});
+	return g_ops->setTrigger(device, trigger, len);
+}
+
 int32_t iio_emu::set_buffers_count(const char* device, uint32_t buffers_count)
 {
 	if (g_ops == nullptr) {

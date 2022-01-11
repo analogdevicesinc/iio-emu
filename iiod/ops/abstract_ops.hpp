@@ -101,6 +101,9 @@ public:
 
 	virtual int32_t setTimeout(uint32_t timeout) = 0;
 
+	virtual int32_t getTrigger(const char* device, char* trigger, size_t len) = 0;
+	virtual int32_t setTrigger(const char* device, const char* trigger, size_t len) = 0;
+
 	virtual int32_t setBuffersCount(const char* device, uint32_t buffers_count) = 0;
 
 	virtual ssize_t getXml(char** outxml) = 0;
