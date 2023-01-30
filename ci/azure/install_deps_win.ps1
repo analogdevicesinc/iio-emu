@@ -30,3 +30,10 @@ wget http://swdownloads.analog.com/cse/build/libiio-win-deps-libusb1.0.24.zip -O
 7z x -y "C:\libiio-win-deps.zip"
 
 set PATH=%PATH%;"C:\Program Files (x86)\Inno Setup 6"
+
+mkdir libiio
+cd libiio
+wget https://github.com/analogdevicesinc/libiio/releases/download/v0.24/Windows-VS-2019-x64.zip -OutFile "libiio.zip"
+7z x -y "C:\libiio.zip"
+dir 
+cd ..
