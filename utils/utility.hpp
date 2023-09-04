@@ -41,6 +41,7 @@
 #define IIO_EMU_UTILS_HPP
 
 #include <numeric>
+#include <cstdint>
 #include <string>
 #include <vector>
 
