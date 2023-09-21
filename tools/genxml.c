@@ -557,7 +557,7 @@ char * iio_context_create_xml(const struct iio_context *ctx)
 	size_t *devices_len = NULL;
 	char *str, *ptr, *eptr, **devices = NULL;
 	char ** ctx_attrs, **ctx_values;
-	char *ctx_attr, *ctx_value;
+	const char *ctx_attr, *ctx_value;
 	unsigned int i;
 
 	len = sizeof(xml_header) - 1;
