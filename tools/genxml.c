@@ -704,6 +704,6 @@ int main(int argc, const char *argv[])
 	}
 
 	const char *xml = iio_context_create_xml(context);
-	printf(xml);
+	printf("%s", xml);
 	return 0;
 }
