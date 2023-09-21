@@ -19,7 +19,7 @@ Available options:
 Basic system setup
 ```shell
 sudo apt-get update
-sudo apt-get install build-essential
+sudo apt-get install cmake build-essential
 ```
 
 Install Prerequisites
