@@ -43,6 +43,7 @@
 
 #include <iostream>
 #include <sstream>
+bool iio_emu::Logger::verboseMode{false};
 
 void iio_emu::Logger::log(iio_emu::LOG_LEVEL level, const std::vector<std::string>& args)
 {
@@ -52,29 +53,29 @@ void iio_emu::Logger::log(iio_emu::LOG_LEVEL level, const std::vector<std::strin
 		UNUSED(msg);
 		break;
 	case IIO_EMU_INFO:
-#if IIO_EMU_LOG_LEVEL >= _IIO_EMU_INFO
-		std::cout << msg << std::endl;
-#endif
+		if (verboseMode || IIO_EMU_LOG_LEVEL >= _IIO_EMU_INFO) {
+			std::cout << msg << std::endl;
+		}
 		break;
 	case IIO_EMU_DEBUG:
-#if IIO_EMU_LOG_LEVEL >= _IIO_EMU_DEBUG
-		std::cout << "DEBUG: " << msg << std::endl;
-#endif
+		if (verboseMode || IIO_EMU_LOG_LEVEL >= _IIO_EMU_DEBUG) {
+			std::cout << "DEBUG: " << msg << std::endl;
+		}
 		break;
 	case IIO_EMU_WARNING:
-#if IIO_EMU_LOG_LEVEL >= _IIO_EMU_WARNING
-		std::cerr << "WARNING: " << msg << std::endl;
-#endif
+		if (verboseMode || IIO_EMU_LOG_LEVEL >= _IIO_EMU_WARNING) {
+			std::cerr << "WARNING: " << msg << std::endl;
+		}
 		break;
 	case IIO_EMU_ERROR:
-#if IIO_EMU_LOG_LEVEL >= _IIO_EMU_ERROR
-		std::cerr << "ERROR: " << msg << std::endl;
-#endif
+		if (verboseMode || IIO_EMU_LOG_LEVEL >= _IIO_EMU_ERROR) {
+			std::cerr << "ERROR: " << msg << std::endl;
+		}
 		break;
 	case IIO_EMU_FATAL:
-#if IIO_EMU_LOG_LEVEL >= _IIO_EMU_FATAL
-		std::cerr << "FATAL: " << msg << std::endl;
-#endif
+		if (verboseMode || IIO_EMU_LOG_LEVEL >= _IIO_EMU_FATAL) {
+			std::cerr << "FATAL: " << msg << std::endl;
+		}
 		break;
 	}
 }
