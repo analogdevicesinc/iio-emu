@@ -69,7 +69,7 @@ public:
 	~Logger() = default;
 
 	static void log(enum LOG_LEVEL level, const std::vector<std::string>& args);
-
+	static bool verboseMode;
 private:
 	static inline std::string buildMsg(const std::vector<std::string>& args);
 };

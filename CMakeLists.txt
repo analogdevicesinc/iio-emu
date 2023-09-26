@@ -37,7 +37,7 @@
 
 
 cmake_minimum_required(VERSION 3.1.3)
-project(iio-emu LANGUAGES CXX)
+project(iio-emu LANGUAGES C CXX)
 
 include(cmake/compileResources.cmake)
 include(cmake/compilerWarnings.cmake)
@@ -68,6 +68,11 @@ endif()
 find_package(tinyiiod REQUIRED)
 find_package(LibXml2 REQUIRED)
 
+if(MSVC)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/wingetopt/src)
+	set(GETOPT_C_FILE ${CMAKE_CURRENT_SOURCE_DIR}/deps/wingetopt/src/getopt.c)
+endif()
+
 FILE(GLOB_RECURSE SRC_LIST
         iiod/*.cpp
         networking/*.cpp
@@ -81,7 +86,8 @@ get_resources(${CMAKE_CURRENT_SOURCE_DIR}/iiod/*.xml COMPILED_RESOURCES)
 add_executable(${PROJECT_NAME}
         main.cpp
         ${SRC_LIST}
-        ${COMPILED_RESOURCES})
+	${COMPILED_RESOURCES}
+	${GETOPT_C_FILE})
 
 if (NOT DEFINED IIO_EMU_LOG_LEVEL)
     target_compile_definitions(${PROJECT_NAME} PRIVATE IIO_EMU_LOG_LEVEL=1)
