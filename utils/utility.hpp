@@ -40,8 +40,8 @@
 #ifndef IIO_EMU_UTILS_HPP
 #define IIO_EMU_UTILS_HPP
 
-#include <numeric>
 #include <cstdint>
+#include <numeric>
 #include <string>
 #include <vector>
 

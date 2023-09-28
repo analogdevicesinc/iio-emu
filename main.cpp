@@ -42,32 +42,32 @@
 
 #include <iostream>
 #include <vector>
-extern "C" {
+extern "C"
+{
 #include <getopt.h>
 }
 
-void handleOptions(int argc, char* argv[]) {
+void handleOptions(int argc, char* argv[])
+{
 	int retOption = 0;
 	static struct option longOptions[] = {
-	{"help",    no_argument, 0,  'h' },
-	{"list",    no_argument, 0,  'l' },
-	{"verbose", no_argument, 0,  'v' }};
+		{"help", no_argument, 0, 'h'}, {"list", no_argument, 0, 'l'}, {"verbose", no_argument, 0, 'v'}};
 	retOption = getopt_long(argc, argv, "hlv", longOptions, NULL);
 
 	switch (retOption) {
 	case 'h':
 		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"Options:"});
-		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-h, ", "--help;"
-							     , "     Displays help on commandline options"});
-		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-l, ", "--list;"
-							     , "     Displays the calling options"});
-		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-v, ", "--verbose;"
-							     , "  Running in verbose mode; Must to be put at the end"});
+		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO,
+				     {"-h, ", "--help;", "     Displays help on commandline options"});
+		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-l, ", "--list;", "     Displays the calling options"});
+		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO,
+				     {"-v, ", "--verbose;", "  Running in verbose mode; Must to be put at the end"});
 		exit(0);
 	case 'l':
 		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"iio-emu adalm2000"});
-		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"iio-emu generic <path_to_XML> <device_id>@<file_path>;"
-							     , " <path_to_XML> is mandatory"});
+		iio_emu::Logger::log(
+			iio_emu::IIO_EMU_INFO,
+			{"iio-emu generic <path_to_XML> <device_id>@<file_path>;", " <path_to_XML> is mandatory"});
 		exit(0);
 	case 'v':
 		iio_emu::Logger::verboseMode = true;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 {
 	handleOptions(argc, argv);
 	if (iio_emu::Logger::verboseMode) {
-		std::string lastArg = std::string(argv[argc-1]);
+		std::string lastArg = std::string(argv[argc - 1]);
 		bool isVerboseAtTheEnd = (lastArg.compare("--verbose") == 0 || lastArg.compare("-v") == 0);
 		if (!isVerboseAtTheEnd) {
 			iio_emu::Logger::log(iio_emu::IIO_EMU_FATAL, {"Verbose option must be put at the end!"});
@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
 
 	std::vector<const char*> args;
 	for (int i = 2; i < argc; i++) {
-		if (iio_emu::Logger::verboseMode && (i == (argc - 1)))
-		{
+		if (iio_emu::Logger::verboseMode && (i == (argc - 1))) {
 			break;
 		}
 		args.push_back(argv[i]);
