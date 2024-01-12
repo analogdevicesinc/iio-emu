@@ -56,6 +56,8 @@ public:
 
 	bool start();
 
+	int port = 30431;
+
 private:
 	static void stop(int signum);
 

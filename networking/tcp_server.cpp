@@ -60,7 +60,6 @@ extern "C"
 #include <tinyiiod/tinyiiod.h>
 }
 
-constexpr int PORT = 30431;
 constexpr int BACKLOG = 64;
 
 bool running = true;
@@ -76,6 +75,7 @@ TcpServer::TcpServer(const char* type, std::vector<const char*>& args)
 		exit(1);
 	}
 	m_iiod = tinyiiod_create(m_ops->getIIODOps());
+	port = m_ops->port;
 }
 
 TcpServer::~TcpServer()
@@ -120,7 +120,7 @@ bool TcpServer::start()
 		return false;
 	}
 
-	ret = networkInterface->bind(PORT);
+	ret = networkInterface->bind(static_cast<uint16_t> (port));
 	if (ret < 0) {
 		Logger::log(IIO_EMU_FATAL, {"Bind failed: ", strerror(errno)});
 		delete networkInterface;
