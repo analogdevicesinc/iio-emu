@@ -59,6 +59,7 @@ public:
 
 	virtual void setCurrentSocket(AbstractSocket* socket) = 0;
 	virtual void socketDisconnected(int fd) = 0;
+	uint16_t port = 0;
 
 	// tinyiiod ops:
 	// communication

@@ -44,8 +44,23 @@
 #include "iiod/context/generic_xml/generic_xml_context.hpp"
 
 #include <utils/logger.hpp>
+#include <iostream>
+
+constexpr uint16_t DEFAULT_PORT = 30431;
+
 
 using namespace iio_emu;
+
+bool is_number(const char* s)
+{
+	while (*s) {
+		if (!isdigit(*s))
+			return false;
+		s++;
+	}
+
+	return true;
+}
 
 AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& args)
 {
@@ -57,6 +72,20 @@ AbstractOps* FactoryOps::buildOps(const char* type, std::vector<const char*>& ar
 			return nullptr;
 		}
 		iiodOpsAbstract = new GenericXmlContext(args);
+
+		const char* last_item = args.back();
+		if (is_number(last_item)) {
+			unsigned long i_port = std::stoul(last_item);
+			if (i_port > 65535) {
+				Logger::log(IIO_EMU_FATAL, {"Invalid port number"});
+				return nullptr;
+			}
+			iiodOpsAbstract->port = static_cast<uint16_t>(i_port);
+			Logger::log(IIO_EMU_INFO, {"Using custom port ", std::to_string(iiodOpsAbstract->port)});
+		}
+		else
+			iiodOpsAbstract->port = DEFAULT_PORT;
+
 	} else if (!strncmp(type, "adalm2000", sizeof("adalm2000") - 1)) {
 		iiodOpsAbstract = new Adalm2000Context();
 	} else {
