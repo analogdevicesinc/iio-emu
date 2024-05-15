@@ -41,6 +41,7 @@
 #define IIO_EMU_TCP_SERVER_H
 
 #include <vector>
+#include <stdint.h>
 
 struct tinyiiod;
 
@@ -54,7 +55,7 @@ public:
 	TcpServer(const char* type, std::vector<const char*>& args);
 	~TcpServer();
 
-	bool start();
+	bool start(uint16_t port);
 
 private:
 	static void stop(int signum);

@@ -46,13 +46,28 @@ extern "C"
 {
 #include <getopt.h>
 }
+#include <inttypes.h> /* strtoimax */
+//default port value
+uint16_t port = 30431;
+
+uint16_t strToUint16T(const char *str) {
+    char *end;
+    errno = 0;
+    intmax_t val = strtoimax(str, &end, 10);
+    if (errno == ERANGE || val < 0 || val > UINT16_MAX || end == str || *end != '\0'){
+        iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"TCP Port value invalid ", str});
+		exit(1);
+    } 
+	iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"TCP Port: ", str});
+    return static_cast<uint16_t>(val);
+}
 
 void handleOptions(int argc, char* argv[])
 {
 	int retOption = 0;
 	static struct option longOptions[] = {
-		{"help", no_argument, 0, 'h'}, {"list", no_argument, 0, 'l'}, {"verbose", no_argument, 0, 'v'}};
-	retOption = getopt_long(argc, argv, "hlv", longOptions, NULL);
+		{"help", no_argument, 0, 'h'}, {"list", no_argument, 0, 'l'}, {"verbose", no_argument, 0, 'v'}, {"port",  required_argument, 0, 'p'}};
+	retOption = getopt_long(argc, argv, "hlvp:", longOptions, NULL);
 
 	switch (retOption) {
 	case 'h':
@@ -60,6 +75,7 @@ void handleOptions(int argc, char* argv[])
 		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO,
 				     {"-h, ", "--help;", "     Displays help on commandline options"});
 		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-l, ", "--list;", "     Displays the calling options"});
+		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"-p, ", "--port;", "     Set TCP server port"});
 		iio_emu::Logger::log(iio_emu::IIO_EMU_INFO,
 				     {"-v, ", "--verbose;", "  Running in verbose mode; Must to be put at the end"});
 		exit(0);
@@ -71,6 +87,14 @@ void handleOptions(int argc, char* argv[])
 		exit(0);
 	case 'v':
 		iio_emu::Logger::verboseMode = true;
+		break;
+	case 'p':
+		if (optarg) {
+			port = strToUint16T(optarg);
+		} else {
+			iio_emu::Logger::log(iio_emu::IIO_EMU_INFO, {"Port value invalid "});
+			exit(0);
+		}
 		break;
 	}
 }
@@ -101,6 +125,6 @@ int main(int argc, char* argv[])
 	}
 
 	iio_emu::TcpServer server(argv[1], args);
-	auto ret = server.start();
+	auto ret = server.start(port);
 	exit(ret);
 }
