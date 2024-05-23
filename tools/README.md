@@ -1,6 +1,6 @@
 # iio-emu: tools
 
-## xml_gen < uri >
+## iio-emu_gen_xml < uri >
 Generate an XML file of a given IIO context based on its URI. The file is similar to the one inside the iio
 context, the only difference between these files is that iio-emu XML contains the attribute
 'value' for all end-nodes, in which is stored the value of the attribute at the generation time.
@@ -20,5 +20,5 @@ make -j3
 ```
 ### Example:
 ```shell
-xml_gen ip:192.168.2.1
+iio-emu_gen_xml ip:192.168.2.1
 ```
