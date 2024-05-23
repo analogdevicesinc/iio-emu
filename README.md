@@ -6,7 +6,7 @@ Available options:
 
 | option | arguments | description |
 | --------- | ----------- | ----------- |
-| generic | <path_to_XML> <device_id>@<file_path> ... | Creates a server that uses a context for accessing attributes based on the XML file. The file should respect the given template. RX or TX devices can be linked to a file from which to stream data |
+| generic | <path_to_XML> <TCP_port_value> <device_id>@<file_path> ... | Creates a server that uses a context for accessing attributes based on the XML file. The server is created at the specified TCP port, if no port is provided a default one will be used. The file should respect the given template. RX or TX devices can be linked to a file from which to stream data |
 | adalm2000 | - | Creates a server for emulating the basic behavior of ADALM2000 |
 
 

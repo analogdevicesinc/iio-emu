@@ -10,7 +10,7 @@ as an XML file, similar to the one that libiio is extracting from the context. T
 difference between libiio and iio-emu XML file is that iio-emu XML contains the attribute
 'value' for all end-nodes.
 
-'xml_gen' is a utility that generates a well-formatted xml, ready to be use by the emulator.
+'iio-emu_gen_xml' is a utility that generates a well-formatted xml, ready to be use by the emulator.
 Please have a look at [instructions](tools/README.md)
 
 An example of a valid XML file:

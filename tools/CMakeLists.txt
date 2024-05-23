@@ -36,7 +36,7 @@
 #  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 3.1.3)
-project(xml_gen LANGUAGES C)
+project(iio-emu_gen_xml LANGUAGES C)
 
 find_library(IIO_LIBRARIES NAMES iio libiio)
 find_path(IIO_INCLUDE_DIRS iio.h)
