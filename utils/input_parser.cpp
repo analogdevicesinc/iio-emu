@@ -44,7 +44,7 @@ using namespace iio_emu;
 const char* InputParser::getXMLPath(std::vector<const char*>& args)
 {
 	for (auto arg : args) {
-		if (std::string(arg).find(':') == std::string::npos) {
+		if (std::string(arg).find(".xml") != std::string::npos) {
 			return arg;
 		}
 	}
