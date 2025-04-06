@@ -41,6 +41,8 @@ project(iio-emu_gen_xml LANGUAGES C)
 find_library(IIO_LIBRARIES NAMES iio libiio)
 find_path(IIO_INCLUDE_DIRS iio.h)
 
+find_package(LibXml2 REQUIRED)
+
 add_executable(${PROJECT_NAME}
 	genxml.c)
 

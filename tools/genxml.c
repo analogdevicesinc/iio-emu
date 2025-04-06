@@ -109,7 +109,7 @@ static const char xml_header[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 				 "<!ATTLIST debug-attribute name CDATA #REQUIRED value CDATA #IMPLIED>"
 				 "<!ATTLIST buffer-attribute name CDATA #REQUIRED value CDATA #IMPLIED>"
 				 "]>";
-#define BUF_SIZE 100
+#define BUF_SIZE NAME_MAX
 
 static char *get_attr_xml2(const struct iio_device *device, const char *attr, size_t *length, enum iio_attr_type type)
 {
