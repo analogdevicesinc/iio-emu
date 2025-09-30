@@ -40,12 +40,14 @@
 #include "attr_ops_xml.hpp"
 
 #include "xml_utils.hpp"
+#include "version_config.h"
 
 #include <libxml/tree.h>
 
 ssize_t iio_emu::read_device_attr(struct _xmlDoc* doc, const char* device_id, const char* attr, char* buf, size_t len,
 				  enum iio_attr_type type)
 {
+
 	xmlNode* node_attr;
 	char* value;
 	LIBXML_TEST_VERSION;
@@ -129,6 +131,15 @@ ssize_t iio_emu::write_channel_attr(struct _xmlDoc* doc, const char* device_id, 
 
 ssize_t iio_emu::read_context_attr(struct _xmlDoc* doc, const char* attr, char* buf, size_t len)
 {
+	// Handle special iio_emu context attribute
+	if (attr && strcmp(attr, "iio_emu") == 0) {
+		const char* version = IIO_EMU_VERSION;
+		size_t version_len = strlen(version);
+		if (version_len >= len) return -ENOENT;
+		strcpy(buf, version);
+		return static_cast<ssize_t>(version_len);
+	}
+
 	xmlNode* node_attr;
 	char* value;
 

@@ -50,6 +50,8 @@ set(IIO_EMU_VERSION_MINOR 2)
 set(IIO_EMU_VERSION_PATCH 0)
 set(IIO_EMU_VERSION ${IIO_EMU_VERSION_MAJOR}.${IIO_EMU_VERSION_MINOR}.${IIO_EMU_VERSION_PATCH})
 
+
+configure_file(utils/version_config.h.cmakein ${CMAKE_CURRENT_BINARY_DIR}/version_config.h @ONLY)
 configure_file(iio-emu.iss.cmakein ${CMAKE_CURRENT_BINARY_DIR}/iio-emu.iss @ONLY)
 
 option(BUILD_TOOLS "Build the tools" OFF)
@@ -102,6 +104,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/resources
+        ${CMAKE_BINARY_DIR}
         )
 
 if (WIN32 OR CYGWIN OR MINGW)

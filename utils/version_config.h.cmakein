@@ -1,0 +1,6 @@
+#ifndef VERSION_CONFIG_H
+#define VERSION_CONFIG_H
+
+#define IIO_EMU_VERSION "@IIO_EMU_VERSION@"
+
+#endif // VERSION_CONFIG_H
