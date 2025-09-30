@@ -48,12 +48,29 @@
 #include "utils/input_parser.hpp"
 #include "utils/network_ops.hpp"
 #include "utils/utility.hpp"
+#include "version_config.h"
 
 #include <iiod/context/generic_xml/devices/generic_rx_device.hpp>
 #include <iiod/context/generic_xml/devices/generic_tx_device.hpp>
 #include <libxml/tree.h>
 
 using namespace iio_emu;
+
+static void addVersionContextAttribute(xmlDoc* doc)
+{
+	if (!doc) return;
+
+	xmlNode* root = xmlDocGetRootElement(doc);
+	if (!root) return;
+
+	// Create the iio_emu context-attribute node with actual version value
+	xmlNode* versionAttr = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("context-attribute"));
+	xmlSetProp(versionAttr, reinterpret_cast<const xmlChar*>("name"), reinterpret_cast<const xmlChar*>("iio_emu"));
+	xmlSetProp(versionAttr, reinterpret_cast<const xmlChar*>("value"), reinterpret_cast<const xmlChar*>(IIO_EMU_VERSION));
+
+	// Add it as the first child of the root context element
+	xmlAddChild(root, versionAttr);
+}
 
 GenericXmlContext::GenericXmlContext(std::vector<const char*>& args)
 {
@@ -62,6 +79,10 @@ GenericXmlContext::GenericXmlContext(std::vector<const char*>& args)
 
 	// TODO: check xmlPath
 	m_doc = xmlReadFile(xmlPath, nullptr, XML_PARSE_DTDVALID);
+
+	// Add the iio_emu:VERSION context attribute to the loaded XML
+	addVersionContextAttribute(m_doc);
+
 	m_xml_size = iio_emu::getXml(m_doc, &m_ctx_xml);
 
 	for (const auto& devInfo : devices) {
@@ -82,6 +103,10 @@ GenericXmlContext::GenericXmlContext(std::vector<const char*>& args)
 GenericXmlContext::GenericXmlContext(const char* file, int fileSize)
 {
 	m_doc = xmlReadMemory(file, fileSize, nullptr, nullptr, XML_PARSE_DTDVALID);
+
+	// Add the iio_emu:VERSION context attribute to the loaded XML
+	addVersionContextAttribute(m_doc);
+
 	m_xml_size = iio_emu::getXml(m_doc, &m_ctx_xml);
 }
 
